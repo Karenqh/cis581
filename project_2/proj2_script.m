@@ -33,7 +33,7 @@ for cnt = 1:n_frame
     warp_frac = 1/(n_frame-1)*(cnt-1)
     dissolve_frac = warp_frac;
 
-    frames{cnt} = morph3(img1, img2, source_points, target_points,...
+    frames{cnt} = morph(img1, img2, source_points, target_points,...
         dt2, warp_frac, dissolve_frac);
 end
 toc;
@@ -78,6 +78,9 @@ hold off;
 %%   %%%%%%%%%%%%%%  THIN PLATE SPLINE %%%%%%%%%%%%
 close all;
 clear; clc;
+
+im1 = imread('qiner_ready.jpg');
+im2 = imread('hit_girl_ready.jpg');
 
 load('source')
 load('target')

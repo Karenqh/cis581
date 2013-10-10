@@ -5,7 +5,6 @@ nr = size(im1, 1);
 nc = size(im1, 2);
 inds = 1:(nr*nc);
 
-
 % Generate coordinates
 [I J] = ind2sub([nr, nc], inds);
 % Convert to column vectors
