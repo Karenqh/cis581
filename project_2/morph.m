@@ -1,0 +1,124 @@
+function morphed_im = morph(im1, im2, im1_pts, im2_pts, tri, warp_frac, dissolve_frac)
+global tri_done src_tri tar_tri
+
+% Some frequently used constants
+nr = size(im1, 1);
+nc = size(im1, 2);
+inds = 1:(nr*nc);
+% [cols, rows] = meshgrid(1:nc, 1:nr);
+
+
+% Generate coordinates
+[I J] = ind2sub([nr, nc], inds);
+% Convert to x-y coordinates
+I = fliplr(I); % y
+% Convert to column vectors
+I = I'; J = J';
+
+% Determine which triangle the pixel is located
+% tsearch is removed from 2012b so I use DelnaunayTri instead
+inter_shape = im1_pts*(1-warp_frac) + im2_pts*warp_frac;
+dt_tmp = tri;
+dt_tmp.X = inter_shape;
+
+idx = pointLocation(dt_tmp, J, I);
+
+%%%%%%%%%% CURRENTY USE FOR LOOP
+dt = tri.Triangulation;
+dt_size = size(dt,1);
+
+% Compute the coordinates of vertices of triangluars
+if tri_done == false
+
+    % Source image
+    src_tri = cell(dt_size,1);
+    for i = 1:dt_size
+        pt1 = im1_pts(dt(i,1), :);
+        pt2 = im1_pts(dt(i,2), :);
+        pt3 = im1_pts(dt(i,3), :);
+        src_tri{i} = [pt1; pt2; pt3];   
+    end
+    
+    % Target image
+    tar_tri = cell(dt_size,1);
+    for i = 1:dt_size
+        pt1 = im2_pts(dt(i,1), :);
+        pt2 = im2_pts(dt(i,2), :);
+        pt3 = im2_pts(dt(i,3), :);
+        tar_tri{i} = [pt1; pt2; pt3];
+    end
+    
+    tri_done = true;
+end
+
+    
+% Compute vertice of tri's in Intermediate image
+inter_tri = cell(dt_size,1);
+for i = 1:dt_size
+    pt1 = inter_shape(dt(i,1), :);
+    pt2 = inter_shape(dt(i,2), :);
+    pt3 = inter_shape(dt(i,3), :);
+    inter_tri{i} = [pt1; pt2; pt3];
+end
+
+
+% Compute the barycentric coordinate
+%%%%%%%%%%  LOOP TROUGH TRIs MIGHT BE FASTER %%%
+%%%% BUT MAY MISS PIXELS %%%
+tmp_im1 = uint8( zeros(size(im1)) );
+tmp_im2 = uint8( zeros(size(im1)) );
+for i = 1:length(inds)
+    % The enclosing tri
+    inter_tri_verts = inter_tri{idx(i)}; % 3-by-2
+    bar_coor = [inter_tri_verts'; 1 1 1]\[J(i); I(i); 1];
+    
+    %%% Process pixels from SOURCE image
+    src_tri_verts = src_tri{idx(i)}; % 3-by-2
+    src_pixel = [src_tri_verts'; 1 1 1] * bar_coor;
+    % Homogeneous coordinates
+    src_pixel = src_pixel / src_pixel(3);
+    
+    % Convert to row/col and Round
+    src_pixel(2) = floor( I(1) -  src_pixel(2) );
+    src_pixel(1) = floor(src_pixel(1));
+    src_pixel(1) = max(1, min(nc, src_pixel(1)));
+    src_pixel(2) = max(1, min(nr, src_pixel(2)));
+    
+    % PASTE THE IMAGE FROM SRC TO INTERMEDIATE TARGETS
+    src_ind = sub2ind([nr nc], src_pixel(2), src_pixel(1));
+    % rgb channels
+    tmp_im1(i) = im1(src_ind);
+    tmp_im1(i+nr*nc) = im1(src_ind+nr*nc);
+    tmp_im1(i+2*nr*nc) = im1(src_ind+2*nr*nc);
+    
+    
+    %%% Process pixels from TARGET image
+    tar_tri_verts = tar_tri{idx(i)}; % 3-by-2
+    tar_pixel = [tar_tri_verts'; 1 1 1] * bar_coor;
+    % Homogeneous coordinates
+    tar_pixel = tar_pixel / tar_pixel(3);
+    
+    % Convert to row/col and Round
+    tar_pixel(2) = floor( I(1) -  tar_pixel(2) );
+    tar_pixel(1) = floor(tar_pixel(1));
+    tar_pixel(1) = max(1, min(nc, tar_pixel(1)));
+    tar_pixel(2) = max(1, min(nr, tar_pixel(2)));
+    
+    % PASTE THE IMAGE FROM SRC TO INTERMEDIATE TARGETS
+    tar_ind = sub2ind([nr nc], tar_pixel(2), tar_pixel(1));
+    % rgb channels
+    tmp_im2(i) = im2(tar_ind);
+    tmp_im2(i+nr*nc) = im2(tar_ind+nr*nc);
+    tmp_im2(i+2*nr*nc) = im2(tar_ind+2*nr*nc);
+    
+    
+end
+
+% CROSS DISSOLVE
+morphed_im = tmp_im1*(1-dissolve_frac) + tmp_im2*dissolve_frac;
+
+
+% INVERSE WARPING
+
+
+
