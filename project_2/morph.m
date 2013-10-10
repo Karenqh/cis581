@@ -1,5 +1,4 @@
-function morphed_im = morph3(im1, im2, im1_pts, im2_pts, tri, warp_frac, dissolve_frac)
-global tri_done src_tri tar_tri
+function morphed_im = morph(im1, im2, im1_pts, im2_pts, tri, warp_frac, dissolve_frac)
 
 % Some frequently used constants
 nr = size(im1, 1);

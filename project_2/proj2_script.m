@@ -6,7 +6,7 @@ clear; clc;
 load('cpstruct')
 img1 = imread('qiner_ready.jpg');
 img2 = imread('hit_girl_ready.jpg');
- cpselect(img1,img2, cpstruct2);
+%  cpselect(img1,img2, cpstruct2);
 
 %% Generate Triangluations
 load('source')
@@ -31,7 +31,6 @@ frames = cell(n_frame, 1);
 tic;
 for cnt = 1:n_frame
     warp_frac = 1/(n_frame-1)*(cnt-1)
-%     dissolve_frac = 0;
     dissolve_frac = warp_frac;
 
     frames{cnt} = morph3(img1, img2, source_points, target_points,...
@@ -75,3 +74,41 @@ imshow(img2); hold on;
 triplot(dt2)
 triplot(DT, 'g')
 hold off;
+
+%%   %%%%%%%%%%%%%%  THIN PLATE SPLINE %%%%%%%%%%%%
+close all;
+clear; clc;
+
+load('source')
+load('target')
+
+inter_pts = (source_points + target_points)/2;
+
+n_frame = 60;
+frames = cell(n_frame,1);
+for cnt = 1:n_frame
+    warp_frac = 1/(n_frame-1)*(cnt-1)
+    dissolve_frac = warp_frac;
+    
+    inter_pts = source_points*(1-warp_frac) + target_points*warp_frac;
+
+    % For source imaage
+    [a1_x,ax_x,ay_x,w_x] = est_tps(inter_pts, source_points(:,1));
+    [a1_y,ax_y,ay_y,w_y] = est_tps(inter_pts, source_points(:,2));
+    
+    morphed_im1 = morph_tsp(im1, a1_x, ax_x, ay_x, w_x,...
+        a1_y, ax_y, ay_y, w_y, inter_pts, size(im1));
+
+    % For target imaage
+    [a1_x,ax_x,ay_x,w_x] = est_tps(inter_pts, target_points(:,1));
+    [a1_y,ax_y,ay_y,w_y] = est_tps(inter_pts, target_points(:,2));
+    
+    morphed_im2 = morph_tsp(im2, a1_x, ax_x, ay_x, w_x,...
+        a1_y, ax_y, ay_y, w_y, inter_pts, size(im2));
+    
+    frames{cnt} = morphed_im1*(1-dissolve_frac)+morphed_im2*dissolve_frac;
+
+end
+
+
+
