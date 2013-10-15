@@ -12,9 +12,9 @@ I = I'; J = J';
 
 % Determine which triangle the pixel is located
 % tsearch is removed from 2012b so I use DelnaunayTri instead
-inter_shape = im1_pts*(1-warp_frac) + im2_pts*warp_frac;
+inter_pts = im1_pts*(1-warp_frac) + im2_pts*warp_frac;
 
-dt_tmp = DelaunayTri(inter_shape);
+dt_tmp = DelaunayTri(inter_pts);
 
 % Localization
 idx = pointLocation(dt_tmp, J, I);
@@ -29,9 +29,9 @@ tmp_im2 = uint8( zeros(size(im1)) );
 
 for tri_i = 1:dt_size
     % Compute the vertice of simplex in Intermediate image
-    pt1 = inter_shape(dt(tri_i,1), :);
-    pt2 = inter_shape(dt(tri_i,2), :);
-    pt3 = inter_shape(dt(tri_i,3), :);
+    pt1 = inter_pts(dt(tri_i,1), :);
+    pt2 = inter_pts(dt(tri_i,2), :);
+    pt3 = inter_pts(dt(tri_i,3), :);
     inter_tri = [[pt1; pt2; pt3]'; 1 1 1];    
     
     % Extract all pixels enclosed by this triangle

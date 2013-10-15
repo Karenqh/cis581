@@ -11,7 +11,7 @@ K(isnan(K)) = 0;
 % pts is n-by-2
 P = [pts, ones(size(pts,1),1)];
 
-lambda = 0.2; %%%%%%???????
+lambda = 0; %%%%%%???????
 bigguy = [K, P; transpose(P), zeros(3)] + lambda*eye( size(pts,1)+3 );
 
 output = bigguy \ [target_value; zeros(3,1)];

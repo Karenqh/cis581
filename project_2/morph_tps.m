@@ -1,4 +1,4 @@
-function morphed_im = morph_tsp(im_src, a1_x, ax_x, ay_x, w_x,...
+function morphed_im = morph_tps(im_src, a1_x, ax_x, ay_x, w_x,...
     a1_y, ax_y, ay_y, w_y, ctr_pts, sz)
 
 % f_x = a1_x + ax_x*x + ay_x*y + sum(U_distance)
@@ -24,9 +24,7 @@ for i = 1:size(ctr_pts,1)
     
     x_W = x_W + inc*w_x(i);
     y_W = y_W + inc*w_y(i);
-    
-    % Affine part
-    
+        
 end
 
 % Compute pos of corresponding pixels in source image
@@ -39,9 +37,12 @@ ys = round(ys);
 xs(xs<=0) = 1;  xs(xs>nc) = nc;
 ys(ys<=0) = 1;  ys(ys>nr) = nr;
 
-src_inds = sub2ind([nr nc], xs, ys);
+src_inds = sub2ind([nr nc], ys, xs);
 
 % Paste pixel values
+if numel(sz) == 2
+    sz = [sz, 3];
+end
 morphed_im = uint8(zeros(sz));
 morphed_im(inds) = im_src(src_inds);
 morphed_im(inds+nr*nc) = im_src(src_inds+nr*nc);

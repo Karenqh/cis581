@@ -3,19 +3,29 @@
 % Select control points
 close all;
 clear; clc;
-load('cpstruct')
+% img = imread('qiner_ready.jpg');
+% img_croped = imcrop(img);
+% %%
+% img2 = imresize(img_croped, [400 400]);
+% imwrite(img2, 'qiner_new.jpg', 'jpeg')
+% load('cpstruct')
+load('input')
+load('base')
 img1 = imread('qiner_ready.jpg');
 img2 = imread('hit_girl_ready.jpg');
-%  cpselect(img1,img2, cpstruct2);
+%  cpselect(img1,img2, input_points, base_points);
 
 %% Generate Triangluations
-load('source')
-load('target')
+% load('source')
+% load('target')
+
+load('input')
+load('base')
 
 % % First generate the average shape
-mid_shape = (source_points + target_points)/2;
+% mid_shape = (source_points + target_points)/2;
 
-dt2 = DelaunayTri(source_points, [24 34]); %!!!!!!!
+dt2 = DelaunayTri(input_points, [24 34]); %!!!!!!!
 
 %
 % warp_frac = 1;
@@ -33,18 +43,32 @@ for cnt = 1:n_frame
     warp_frac = 1/(n_frame-1)*(cnt-1)
     dissolve_frac = warp_frac;
 
-    frames{cnt} = morph(img1, img2, source_points, target_points,...
+    frames{cnt} = morph(img1, img2, input_points, base_points,...
         dt2, warp_frac, dissolve_frac);
 end
 toc;
 
 %%
-figure(5);
+h = figure(5); clf;
+video = VideoWriter('tps.avi'); 
+video.FrameRate = 10;
+open(video); 
+n_frame = 60;
+
 for cnt = 1:n_frame
-    imshow(frames{cnt})
-    pause(0.1)
-    drawnow;
+%     imshow(frames{cnt})
+%     pause(0.1)
+%     drawnow;
+        
+  image(frames{cnt}); 
+  axis image; 
+  axis off; 
+  F = getframe(gcf); 
+  writeVideo(video,F); 
+    
+
 end
+close(video);
 
 
 
@@ -82,10 +106,10 @@ clear; clc;
 im1 = imread('qiner_ready.jpg');
 im2 = imread('hit_girl_ready.jpg');
 
-load('source')
-load('target')
+load('input')
+load('base')
 
-inter_pts = (source_points + target_points)/2;
+inter_pts = (input_points + base_points)/2;
 
 n_frame = 60;
 frames = cell(n_frame,1);
@@ -93,20 +117,20 @@ for cnt = 1:n_frame
     warp_frac = 1/(n_frame-1)*(cnt-1)
     dissolve_frac = warp_frac;
     
-    inter_pts = source_points*(1-warp_frac) + target_points*warp_frac;
+    inter_pts = input_points*(1-warp_frac) + base_points*warp_frac;
 
     % For source imaage
-    [a1_x,ax_x,ay_x,w_x] = est_tps(inter_pts, source_points(:,1));
-    [a1_y,ax_y,ay_y,w_y] = est_tps(inter_pts, source_points(:,2));
+    [a1_x,ax_x,ay_x,w_x] = est_tps(inter_pts, input_points(:,1));
+    [a1_y,ax_y,ay_y,w_y] = est_tps(inter_pts, input_points(:,2));
     
-    morphed_im1 = morph_tsp(im1, a1_x, ax_x, ay_x, w_x,...
+    morphed_im1 = morph_tps(im1, a1_x, ax_x, ay_x, w_x,...
         a1_y, ax_y, ay_y, w_y, inter_pts, size(im1));
 
     % For target imaage
-    [a1_x,ax_x,ay_x,w_x] = est_tps(inter_pts, target_points(:,1));
-    [a1_y,ax_y,ay_y,w_y] = est_tps(inter_pts, target_points(:,2));
+    [a1_x,ax_x,ay_x,w_x] = est_tps(inter_pts, base_points(:,1));
+    [a1_y,ax_y,ay_y,w_y] = est_tps(inter_pts, base_points(:,2));
     
-    morphed_im2 = morph_tsp(im2, a1_x, ax_x, ay_x, w_x,...
+    morphed_im2 = morph_tps(im2, a1_x, ax_x, ay_x, w_x,...
         a1_y, ax_y, ay_y, w_y, inter_pts, size(im2));
     
     frames{cnt} = morphed_im1*(1-dissolve_frac)+morphed_im2*dissolve_frac;
