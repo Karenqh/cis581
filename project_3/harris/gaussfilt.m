@@ -43,3 +43,5 @@ function smim = gaussfilt(im, sigma)
         smim(:,:,n) = filter2(h, im(:,:,n));
     end
     
+%     smim = imfilter(im, h, 'symmetric','same');
+    
