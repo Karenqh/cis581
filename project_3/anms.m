@@ -7,7 +7,6 @@ nc = imgsize(2);
 
 % Find each pixel's "dominant territory"
 r_queue = inf(numel(cimg),1);
-r_matrix = inf(imgsize);
 for ind=1:numel(cimg)
     % Initialization
     r = 0;
@@ -27,16 +26,16 @@ for ind=1:numel(cimg)
             break;
         end
         
-        [row col] = find( cimg(r_min:r_max, c_min:c_max)>cimg(ind) );
+        [row ~] = find( cimg(r_min:r_max, c_min:c_max)>cimg(ind) );
         if ~isempty(row)
             hit = true;
+            % TODO
             % Euclidean distance ?????
 %             r = norm([row col]);
         end
     end
     % Store the results and reset flag
     r_queue(ind) = r;
-    r_matrix(ind) = r;
 end
 
 % Sort by radius in descending order
@@ -47,11 +46,6 @@ end
 % Keep the top max_pts points as Corners
 % DO WE REALLY NEED TO Check if the RMAX IS UNIQUE????
 rmax = r_sorted(max_pts);
-
-r_matrix(r_matrix<rmax) = 0;
-r_matrix(r_matrix>0) = 1;
-figure(5); imagesc(r_matrix); colormap(gray);
-
 
 [y x] = ind2sub(imgsize, pos(1:max_pts));
     

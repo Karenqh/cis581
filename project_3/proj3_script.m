@@ -21,18 +21,23 @@ im3 = imread('pics/3.JPG');
 % figure(2); imshow(im2);
 % figure(3); imshow(im3);
 
-%%
-% figure(1); imshow(im1);
-% figure(2); imshow(im2);
 
+figure(1); imshow(im1);
+figure(2); imshow(im2);
+%%
 im1 = rgb2gray(im1);
 im2 = rgb2gray(im2);
 
 % Corner detection using Harris detector
 sigma = 2;
-thres = 50;
 cimg1 = harris(im1, sigma);
 cimg2 = harris(im2, sigma);
+
+% Avoid the 4 image corners
+cimg1(1,1) = 0;
+cimg1(end,end) = 0;
+cimg2(1,1) = 0;
+cimg2(end,end) = 0;
 
 
 %%%%%%%% DEBUGGING
@@ -45,7 +50,12 @@ cimg2 = harris(im2, sigma);
 max_pts = 80; % TUNE THIS!!!!!!!!!!!!!!
 tic;
 [y1 x1 rmax1] = anms(cimg1, max_pts);
+figure(1); hold on;
+plot(x1, y1, '.g');
+
 [y2 x2 rmax2] = anms(cimg2, max_pts);
+figure(2); hold on;
+plot(x2, y2, '.g');
 toc;
 
 %%%%%%%% DEBUGGING
@@ -58,5 +68,24 @@ toc;
 
 %% Feature descripter
 tic;
-p = feat_desc(im1, y, x);
+p1 = feat_desc(im1, y1, x1);
+p2 = feat_desc(im2, y2, x2);
 toc;
+
+%% Feature Matching
+m = feat_match(p1,p2);
+
+%%%%%%%% DEBUGGING
+good1 = find(m~=-1);
+good2 = m(good1);
+figure(1); hold on;
+plot(x1(good1), y1(good1), '.r');
+
+figure(2); hold on;
+plot(x2(good2), y2(good2), '.r');
+
+
+%% RANSAC
+
+
+

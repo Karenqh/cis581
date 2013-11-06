@@ -1,3 +1,9 @@
 # Source pics
 BSDS300
 *.DS_Store
+
+# Matlab tmp files
+*.m~
+
+# Compressed files
+*.zip

@@ -52,11 +52,22 @@ end
 % Get the descripters
 p = [];
 for cnt = 1:length(y)
-    idx = sub2ind(imgsize, rows_list(:,cnt), cols_list(:,cnt));
+    indices = sub2ind(imgsize, rows_list(:,cnt), cols_list(:,cnt));
     % Normalization: 0-mean, 1-std
-    vals = double( im(idx) );
+    vals = double( im(indices) );
     vals = vals - mean(vals);
     vals = vals/std(vals);
+    
+    %%%%%%% Check if normalized %%%%%%%%%%%%%
+    if mean(vals) > 1e-10
+        disp('MEAN of descripters is not ZERO');
+        return;
+    end
+    if std(vals)-1 > 1e-10
+        disp('STD of descripters is not ONE');
+        return;
+    end
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     p = cat(2, p, vals);
 end
 
