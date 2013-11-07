@@ -36,6 +36,8 @@ for i = -15:5:20
         rows_tmp = corner_rows + i;  % n-by-1
         cols_tmp = corner_cols + j;
         
+        % MAY JUST THROW OUT THE PIXELS TOO CLOSE TO BOUNDRY
+        
         % Deal with points outside boundaries
         rows_tmp(rows_tmp<1) = 1 - rows_tmp(rows_tmp<1);
         rows_tmp(rows_tmp>nr) = 2*nr+1 - rows_tmp(rows_tmp>nr);
