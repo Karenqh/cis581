@@ -24,12 +24,16 @@ dt_size = size(dt,1);
 
 % Compute the barycentric coordinate
 tmp_im1 = uint8( zeros(size(im1)) );
-tmp_im1_floor = uint8( zeros(size(im1)) );
-tmp_im1_ceil = uint8( zeros(size(im1)) );
+tmp_im1_1 = uint8( zeros(size(im1)) );
+tmp_im1_2 = uint8( zeros(size(im1)) );
+tmp_im1_3 = uint8( zeros(size(im1)) );
+tmp_im1_4 = uint8( zeros(size(im1)) );
 
 tmp_im2 = uint8( zeros(size(im1)) );
-tmp_im2_floor = uint8( zeros(size(im1)) );
-tmp_im2_ceil = uint8( zeros(size(im1)) );
+tmp_im2_1 = uint8( zeros(size(im1)) );
+tmp_im2_2 = uint8( zeros(size(im1)) );
+tmp_im2_3 = uint8( zeros(size(im1)) );
+tmp_im2_4 = uint8( zeros(size(im1)) );
 
 
 for tri_i = 1:dt_size
@@ -62,32 +66,38 @@ for tri_i = 1:dt_size
     yss = src_pixel_floor(2,:);
     xss(xss<=0) = 1;    xss(xss>nc) = nc;
     yss(yss<=0) = 1;    yss(yss>nr) = nr;
-    src_pixel_floor(1,:) = xss;
-    src_pixel_floor(2,:) = yss;
-    src_ind_floor = sub2ind([nr nc], src_pixel_floor(2,:), src_pixel_floor(1,:));
+    xss_plus = xss + 1;   xss_plus(xss_plus>nc) = nc;
+    yss_plus = yss + 1;   yss_plus(yss_plus>nr) = nr;
     
-    
-    % Convert to row/col and Round
-    src_pixel_ceil = ceil(src_pixel);
-    xss = src_pixel_ceil(1,:);
-    yss = src_pixel_ceil(2,:);
-    xss(xss<=0) = 1;    xss(xss>nc) = nc;
-    yss(yss<=0) = 1;    yss(yss>nr) = nr;
-    src_pixel_ceil(1,:) = xss;
-    src_pixel_ceil(2,:) = yss;
-    src_ind_ceil = sub2ind([nr nc], src_pixel_ceil(2,:), src_pixel_ceil(1,:));
-    
+    src_ind_1 = sub2ind([nr nc], yss, xss);
+    src_ind_2 = sub2ind([nr nc], yss, xss_plus);
+    src_ind_3 = sub2ind([nr nc], yss_plus, xss);
+    src_ind_4 = sub2ind([nr nc], yss_plus, xss_plus);
+        
     % PASTE THE IMAGE FROM SRC TO INTERMEDIATE TARGETS
     % rgb channels
-    tmp_im1_floor(inter_ind) = im1(src_ind_floor);
-    tmp_im1_floor(inter_ind+nr*nc) = im1(src_ind_floor+nr*nc);
-    tmp_im1_floor(inter_ind+2*nr*nc) = im1(src_ind_floor+2*nr*nc);
+    tmp_im1_1(inter_ind) = im1(src_ind_1);
+    tmp_im1_1(inter_ind+nr*nc) = im1(src_ind_1+nr*nc);
+    tmp_im1_1(inter_ind+2*nr*nc) = im1(src_ind_1+2*nr*nc);
     
-    tmp_im1_ceil(inter_ind) = im1(src_ind_ceil);
-    tmp_im1_ceil(inter_ind+nr*nc) = im1(src_ind_ceil+nr*nc);
-    tmp_im1_ceil(inter_ind+2*nr*nc) = im1(src_ind_ceil+2*nr*nc);
+    tmp_im1_2(inter_ind) = im1(src_ind_2);
+    tmp_im1_2(inter_ind+nr*nc) = im1(src_ind_2+nr*nc);
+    tmp_im1_2(inter_ind+2*nr*nc) = im1(src_ind_2+2*nr*nc);
+
+    tmp_im1_3(inter_ind) = im1(src_ind_3);
+    tmp_im1_3(inter_ind+nr*nc) = im1(src_ind_3+nr*nc);
+    tmp_im1_3(inter_ind+2*nr*nc) = im1(src_ind_3+2*nr*nc);
+
     
-    tmp_im1 = 0.5*tmp_im1_floor + 0.5*tmp_im1_ceil;
+    tmp_im1_4(inter_ind) = im1(src_ind_4);
+    tmp_im1_4(inter_ind+nr*nc) = im1(src_ind_4+nr*nc);
+    tmp_im1_4(inter_ind+2*nr*nc) = im1(src_ind_4+2*nr*nc);
+    
+%     tmp_im1 = 0.25*(tmp_im1_1+tmp_im1_2+tmp_im1_3+tmp_im1_4);
+    % Avoid over flow (when the sum is over 255 it will clamp)
+    tmp_im1 = 0.25*tmp_im1_1 + 0.25*tmp_im1_2 + 0.25*tmp_im1_3 + 0.25*tmp_im1_4;
+    
+    clear xss yss xss_plus yss_plus
     
     %%% Process pixels from TARGET image
     pt1 = im2_pts(dt(tri_i,1), :);
@@ -102,31 +112,35 @@ for tri_i = 1:dt_size
     yss = tar_pixel_floor(2,:);
     xss(xss<=0) = 1;    xss(xss>nc) = nc;
     yss(yss<=0) = 1;    yss(yss>nr) = nr;
-    tar_pixel_floor(1,:) = xss;
-    tar_pixel_floor(2,:) = yss;
-    tar_ind_floor = sub2ind([nr nc],tar_pixel_floor(2,:),tar_pixel_floor(1,:));
-    
-    % Convert to row/col and Round
-    tar_pixel_ceil = ceil(tar_pixel);
-    xss = tar_pixel_ceil(1,:);
-    yss = tar_pixel_ceil(2,:);
-    xss(xss<=0) = 1;    xss(xss>nc) = nc;
-    yss(yss<=0) = 1;    yss(yss>nr) = nr;
-    tar_pixel_ceil(1,:) = xss;
-    tar_pixel_ceil(2,:) = yss;
-    tar_ind_ceil = sub2ind([nr nc], tar_pixel_ceil(2,:), tar_pixel_ceil(1,:));
+    xss_plus = xss + 1;   xss_plus(xss_plus>nc) = nc;
+    yss_plus = yss + 1;   yss_plus(yss_plus>nr) = nr;
+
+    tar_ind_1 = sub2ind([nr nc], yss, xss);
+    tar_ind_2 = sub2ind([nr nc], yss, xss_plus);
+    tar_ind_3 = sub2ind([nr nc], yss_plus, xss);
+    tar_ind_4 = sub2ind([nr nc], yss_plus, xss_plus);
     
     % PASTE THE IMAGE FROM SRC TO INTERMEDIATE TARGETS
     % rgb channels
-    tmp_im2_floor(inter_ind) = im2(tar_ind_floor);
-    tmp_im2_floor(inter_ind+nr*nc) = im2(tar_ind_floor+nr*nc);
-    tmp_im2_floor(inter_ind+2*nr*nc) = im2(tar_ind_floor+2*nr*nc);
+    tmp_im2_1(inter_ind) = im2(tar_ind_1);
+    tmp_im2_1(inter_ind+nr*nc) = im2(tar_ind_1+nr*nc);
+    tmp_im2_1(inter_ind+2*nr*nc) = im2(tar_ind_1+2*nr*nc);
 
-    tmp_im2_ceil(inter_ind) = im2(tar_ind_ceil);
-    tmp_im2_ceil(inter_ind+nr*nc) = im2(tar_ind_ceil+nr*nc);
-    tmp_im2_ceil(inter_ind+2*nr*nc) = im2(tar_ind_ceil+2*nr*nc);
+    tmp_im2_2(inter_ind) = im2(tar_ind_2);
+    tmp_im2_2(inter_ind+nr*nc) = im2(tar_ind_2+nr*nc);
+    tmp_im2_2(inter_ind+2*nr*nc) = im2(tar_ind_2+2*nr*nc);
+
+    tmp_im2_3(inter_ind) = im2(tar_ind_3);
+    tmp_im2_3(inter_ind+nr*nc) = im2(tar_ind_3+nr*nc);
+    tmp_im2_3(inter_ind+2*nr*nc) = im2(tar_ind_3+2*nr*nc);
+
+    tmp_im2_4(inter_ind) = im2(tar_ind_4);
+    tmp_im2_4(inter_ind+nr*nc) = im2(tar_ind_4+nr*nc);
+    tmp_im2_4(inter_ind+2*nr*nc) = im2(tar_ind_4+2*nr*nc);
+
     
-    tmp_im2 = 0.5*tmp_im2_floor + 0.5*tmp_im2_ceil;
+%     tmp_im2 = 0.25*(tmp_im2_1+tmp_im2_2+tmp_im2_3+tmp_im2_4);
+    tmp_im2 = 0.25*tmp_im2_1 + 0.25*tmp_im2_2 + 0.25*tmp_im2_3 + 0.25*tmp_im2_4;
 
 end
 
