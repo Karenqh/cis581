@@ -50,7 +50,7 @@ toc;
 
 %%
 h = figure(5); clf;
-video = VideoWriter('tps.avi'); 
+video = VideoWriter('test_interp.avi'); 
 video.FrameRate = 10;
 open(video); 
 n_frame = 60;
