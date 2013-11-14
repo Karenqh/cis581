@@ -86,6 +86,6 @@ plot(x2(good2), y2(good2), '.r');
 
 
 %% RANSAC
-
+[H,inlier_ind] = ransac_est_homography(y1, x1, y2, x2, thresh);
 
 
