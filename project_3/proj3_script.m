@@ -78,14 +78,22 @@ m = feat_match(p1,p2);
 %%%%%%%% DEBUGGING
 good1 = find(m~=-1);
 good2 = m(good1);
-figure(1); hold on;
-plot(x1(good1), y1(good1), '.r');
 
-figure(2); hold on;
-plot(x2(good2), y2(good2), '.r');
+y1s = y1(good1);  x1s = x1(good1);
+y2s = y2(good2);  x2s = x2(good2);
+
+% figure(1); hold on;
+% plot(x1(good1), y1(good1), '.r');
+% 
+% figure(2); hold on;
+% plot(x2(good2), y2(good2), '.r');
 
 
 %% RANSAC
-[H,inlier_ind] = ransac_est_homography(y1, x1, y2, x2, thresh);
+thresh = 0.5;
+[H,inlier_ind] = ransac_est_homography(y1s, x1s, y2s, x2s, thresh);
+
+%% Panorama
+img_mosaic = mymosaic(img_input);
 
 
