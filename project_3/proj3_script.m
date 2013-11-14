@@ -22,8 +22,6 @@ im3 = imread('pics/3.JPG');
 % figure(3); imshow(im3);
 
 
-figure(1); imshow(im1);
-figure(2); imshow(im2);
 %%
 im1 = rgb2gray(im1);
 im2 = rgb2gray(im2);
@@ -50,12 +48,12 @@ cimg2(end,end) = 0;
 max_pts = 80; % TUNE THIS!!!!!!!!!!!!!!
 tic;
 [y1 x1 rmax1] = anms(cimg1, max_pts);
-figure(1); hold on;
-plot(x1, y1, '.g');
+% figure(1); hold on;
+% plot(x1, y1, '.g');
 
 [y2 x2 rmax2] = anms(cimg2, max_pts);
-figure(2); hold on;
-plot(x2, y2, '.g');
+% figure(2); hold on;
+% plot(x2, y2, '.g');
 toc;
 
 %%%%%%%% DEBUGGING
@@ -94,6 +92,11 @@ thresh = 0.5;
 [H,inlier_ind] = ransac_est_homography(y1s, x1s, y2s, x2s, thresh);
 
 %% Panorama
+img_input = cell(2,1);
+img_input{1} = im1;
+img_input{2} = im2;
+
+% A wrapper for handling everyting
 img_mosaic = mymosaic(img_input);
 
 
