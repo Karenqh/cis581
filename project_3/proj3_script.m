@@ -95,8 +95,12 @@ thresh = 0.5;
 img_input = cell(2,1);
 img_input{1} = im1;
 img_input{2} = im2;
+img_input{3} = im3;
+
 
 % A wrapper for handling everyting
 img_mosaic = mymosaic(img_input);
+close all;
+image(img_mosaic);
 
 

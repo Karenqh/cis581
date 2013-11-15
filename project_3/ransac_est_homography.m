@@ -20,7 +20,7 @@ while iter < maxIter
     src_x = x2(rnd_idx);
 
     % Compute homography from samples
-    tmpH = est_homography(des_y, des_x, src_y, src_x);
+    tmpH = est_homography(des_x, des_y, src_x, src_y);
 
     % Apply homography to the remaining points
 %     other_y1 = y1; other_x1 = x1; other_y2 = y2; other_x2 = x2;
@@ -28,7 +28,7 @@ while iter < maxIter
 %     other_x1(rnd_idx) = [];
 %     other_y2(rnd_idx) = [];
 %     other_x2(rnd_idx) = [];
-    [est_y1 est_x1] = apply_homography(tmpH, y2, x2);
+    [est_x1 est_y1] = apply_homography(tmpH, x2, y2);
     
     % Vote for this homography
     dists = sqrt((est_y1-y1).^2 + (est_x1-x1).^2);
@@ -46,6 +46,6 @@ while iter < maxIter
 end
 
 % Refine the transformation
-H = est_homography(y1(inlier_ind), x1(inlier_ind), y2(inlier_ind), x2(inlier_ind));
+H = est_homography(x1(inlier_ind), y1(inlier_ind), x2(inlier_ind), y2(inlier_ind));
 
 
