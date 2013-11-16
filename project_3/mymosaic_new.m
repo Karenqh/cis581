@@ -13,16 +13,18 @@ max_pts = 100; % TUNE THIS!!!!!!!!!!!!!!
 ransac_thres = 0.5;
 
 % For Stitching: set up canvas
-size_x = 1200;  size_y = 1200;
+size_x = 800;  size_y = 800;
 img_mosaic = uint8(zeros(size_y,size_x,3));
-[cols rows] = meshgrid(1:size_x, 1:size_y);
-ox = 1; oy = 400;
+ox = 1; oy = round(size_y/2-nr/2);
 
 % Initialization
 img_gray = {[]};
 y = {[]}; x = {[]};
 p = {[]}; m = {[]};
 H = {[]};
+
+% Blur kernel
+% G = [1/4 1/2 1/4; 1/2 1 1/2; 1/4 1/2 1/4];
 
 for cnt = 1:numel(img_input)
     % RGB to GRAY
@@ -51,6 +53,11 @@ for cnt = 1:numel(img_input)
         [H{cnt-1},~] = ransac_est_homography(y1s, x1s, y2s, x2s, ransac_thres);
 
         % Stitch
+        % USE INVERSE WARPING TO AVOID HOLES
+        
+        % First four corners
+        
+        
         H_now = H_pre*H{cnt-1};
         H_pre = H_now;
         [src_new_x src_new_y] = apply_homography(H_now, src_cols(:), src_rows(:));
@@ -74,6 +81,10 @@ for cnt = 1:numel(img_input)
     end
 end
 
+% img_mosaic(:,:,1) = conv2(img_mosaic(:,:,1), G, 'same');
+% img_mosaic(:,:,2) = conv2(img_mosaic(:,:,2), G, 'same');
+% img_mosaic(:,:,3) = conv2(img_mosaic(:,:,3), G, 'same');
+% 
 
 
 
