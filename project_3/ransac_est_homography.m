@@ -23,11 +23,6 @@ while iter < maxIter
     tmpH = est_homography(des_x, des_y, src_x, src_y);
 
     % Apply homography to the remaining points
-%     other_y1 = y1; other_x1 = x1; other_y2 = y2; other_x2 = x2;
-%     other_y1(rnd_idx) = [];
-%     other_x1(rnd_idx) = [];
-%     other_y2(rnd_idx) = [];
-%     other_x2(rnd_idx) = [];
     [est_x1 est_y1] = apply_homography(tmpH, x2, y2);
     
     % Vote for this homography

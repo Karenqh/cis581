@@ -2,17 +2,18 @@ function img_mosaic = mymosaic(img_input)
 % Preprocess:  2nd pic as the reference
 im1 = rgb2gray(img_input{2});  % Target
 im2 = rgb2gray(img_input{1});  % Source
+im3 = rgb2gray(img_input{3});  % Source
 
 %% Corner detection using Harris detector
 sigma = 2;
 cimg1 = harris(im1, sigma);
 cimg2 = harris(im2, sigma);
 
-% Avoid the 4 image corners
-cimg1(1,1) = 0;
-cimg1(end,end) = 0;
-cimg2(1,1) = 0;
-cimg2(end,end) = 0;
+% % Avoid the 4 image corners
+% cimg1(1,1) = 0;
+% cimg1(end,end) = 0;
+% cimg2(1,1) = 0;
+% cimg2(end,end) = 0;
 
 %% Adaptive Non-maxima Supprestion
 max_pts = 80; % TUNE THIS!!!!!!!!!!!!!!

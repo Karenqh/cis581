@@ -99,7 +99,9 @@ img_input{3} = im3;
 
 
 % A wrapper for handling everyting
-img_mosaic = mymosaic(img_input);
+% img_mosaic = mymosaic(img_input);
+img_mosaic = mymosaic_new(img_input);
+
 close all;
 image(img_mosaic);
 
