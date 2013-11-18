@@ -18,7 +18,6 @@ y = {[]}; x = {[]};
 p = {[]}; m = {[]};
 H = {[]};
 
-mosaic_pieces = {[]};
 
 for cnt = 1:numel(img_input)
     % RGB to GRAY
@@ -40,9 +39,11 @@ for cnt = 1:numel(img_input)
         % Offset of mosaic piece
         ox = 0;
         oy = 50;
-
+    
         % For Stitching: set up canvas
-        img_mosaic(oy+1:oy+nr, ox+1:ox+nc, :) = img_input{cnt};
+%         img_mosaic(oy+1:oy+nr, ox+1:ox+nc, :) = img_input{cnt};
+        img_mosaic(1:nr, ox+1:ox+nc, :) = img_input{cnt};
+
         H_pre = eye(3);
 
     elseif cnt>1
@@ -78,8 +79,11 @@ for cnt = 1:numel(img_input)
         new_img_nc = max(corner_xs) - min(corner_xs);
         new_img_nr = max(corner_ys) - min(corner_ys);
         
+        offset_x = ox+min(corner_xs);
+        offset_y = oy+min(corner_ys);
+        
         [tar_cols tar_rows] = ...
-            meshgrid(ox+min(corner_xs)+1:ox+min(corner_xs)+new_img_nc,oy+1:oy+new_img_nr);
+            meshgrid(offset_x+1:offset_x+new_img_nc, offset_y+1:offset_y+new_img_nr);
         tar_cols_list = tar_cols(:);
         tar_rows_list = tar_rows(:);
 
@@ -111,5 +115,4 @@ for cnt = 1:numel(img_input)
     end
 end
 
-% img_mosaic(oy+1:oy+nr, ox+1:ox+nc, :) = img_input{1};
 
