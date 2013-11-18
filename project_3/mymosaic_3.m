@@ -32,17 +32,17 @@ for cnt = 1:numel(img_input)
     
     if cnt==1
         % Update canvas dimension
-        size_x = nc*2;
-        size_y = nr + 100;
+        size_x = nc*3;
+        size_y = nr + 600;
         img_mosaic = uint8(zeros(size_y,size_x,3));
 
         % Offset of mosaic piece
         ox = 0;
-        oy = 50;
+        oy = 300;
     
         % For Stitching: set up canvas
 %         img_mosaic(oy+1:oy+nr, ox+1:ox+nc, :) = img_input{cnt};
-        img_mosaic(1:nr, ox+1:ox+nc, :) = img_input{cnt};
+        img_mosaic(oy+1:oy+nr, ox+1:ox+nc, :) = img_input{cnt};
 
         H_pre = eye(3);
 
@@ -79,11 +79,12 @@ for cnt = 1:numel(img_input)
         new_img_nc = max(corner_xs) - min(corner_xs);
         new_img_nr = max(corner_ys) - min(corner_ys);
         
-        offset_x = ox+min(corner_xs);
-        offset_y = oy+min(corner_ys);
+        offset_x = min(corner_xs);
+        offset_y = min(corner_ys);
         
         [tar_cols tar_rows] = ...
-            meshgrid(offset_x+1:offset_x+new_img_nc, offset_y+1:offset_y+new_img_nr);
+            meshgrid(offset_x+1:offset_x+new_img_nc, ...
+                offset_y+1:offset_y+new_img_nr);
         tar_cols_list = tar_cols(:);
         tar_rows_list = tar_rows(:);
 
@@ -96,11 +97,11 @@ for cnt = 1:numel(img_input)
         tar_rows_list(leaveout) = [];
         
         ind_r = sub2ind(size(img_mosaic), ...
-            tar_rows_list, tar_cols_list, ones(length(tar_rows_list),1));
+            tar_rows_list+oy, tar_cols_list+ox, ones(length(tar_rows_list),1));
         ind_g = sub2ind(size(img_mosaic), ...
-            tar_rows_list, tar_cols_list, 2*ones(length(tar_rows_list),1));
+            tar_rows_list+oy, tar_cols_list+ox, 2*ones(length(tar_rows_list),1));
         ind_b = sub2ind(size(img_mosaic), ...
-            tar_rows_list, tar_cols_list, 3*ones(length(tar_rows_list),1));
+            tar_rows_list+oy, tar_cols_list+ox, 3*ones(length(tar_rows_list),1));
 
         % Interpolation
         vr = interp2(src_cols, src_rows, double(img_input{cnt}(:,:,1)), src_x, src_y);

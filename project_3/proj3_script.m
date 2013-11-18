@@ -4,9 +4,20 @@ clear;
 close all;
 
 % Read in image and convert to gray scale
-im1 = imread('pics/1.JPG');
-im2 = imread('pics/2.JPG');
-im3 = imread('pics/3.JPG');
+listing = dir('pics1/*.JPG');
+
+for i=1:length(listing)
+    filein = strcat('pics1/', listing(i).name);
+    fileout = strcat('pennpark/', listing(i).name);
+    im = imread(filein);
+    im = imresize(im, 0.2);
+    imwrite(im, fileout, 'jpeg');
+end
+    
+
+% im1 = imread('pics/1.JPG');
+% im2 = imread('pics/2.JPG');
+% im3 = imread('pics/3.JPG');
 
 % im1 = imresize(im1, 0.2);
 % im2 = imresize(im2, 0.2);
@@ -92,23 +103,36 @@ thresh = 0.5;
 [H,inlier_ind] = ransac_est_homography(y1s, x1s, y2s, x2s, thresh);
 
 %% Panorama
+clc;
+clear;
 close all;
 
-img_input = cell(2,1);
+% Read in image and convert to gray scale
+im1 = imread('pics/1.JPG');
+im2 = imread('pics/2.JPG');
+im3 = imread('pics/3.JPG');
+
+img_input = {[]};
 img_input{1} = im1;
 img_input{2} = im2;
 img_input{3} = im3;
 
-% img_input{1} = im2;
-% img_input{2} = im3;
+% % Read in image and convert to gray scale
+% listing = dir('pennpark/*.JPG');
+% img_input = {[]};
+% for i=1:3   %1:length(listing)
+%     imgid = strcat('pennpark/', listing(i+2).name);
+%     img_input{i} = imread(imgid);
+% end
 
 
 
 % A wrapper for handling everyting
-% img_mosaic = mymosaic(img_input);
-% img_mosaic = mymosaic_new(img_input);
 img_mosaic = mymosaic_3(img_input);
 
 image(img_mosaic);
+
+%% Final results
+
 
 
