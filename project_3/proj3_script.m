@@ -92,6 +92,8 @@ thresh = 0.5;
 [H,inlier_ind] = ransac_est_homography(y1s, x1s, y2s, x2s, thresh);
 
 %% Panorama
+close all;
+
 img_input = cell(2,1);
 img_input{1} = im1;
 img_input{2} = im2;
@@ -102,7 +104,6 @@ img_input{3} = im3;
 % img_mosaic = mymosaic(img_input);
 img_mosaic = mymosaic_new(img_input);
 
-close all;
 image(img_mosaic);
 
 
