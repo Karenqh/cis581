@@ -99,10 +99,15 @@ img_input{1} = im1;
 img_input{2} = im2;
 img_input{3} = im3;
 
+% img_input{1} = im2;
+% img_input{2} = im3;
+
+
 
 % A wrapper for handling everyting
 % img_mosaic = mymosaic(img_input);
-img_mosaic = mymosaic_new(img_input);
+% img_mosaic = mymosaic_new(img_input);
+img_mosaic = mymosaic_3(img_input);
 
 image(img_mosaic);
 

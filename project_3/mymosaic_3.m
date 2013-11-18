@@ -1,4 +1,4 @@
-function img_mosaic = mymosaic_new(img_input)
+function img_mosaic = mymosaic_3(img_input)
 
 % Frequently used constants
 nr = size(img_input{1},1);
@@ -32,17 +32,18 @@ for cnt = 1:numel(img_input)
     
     
     if cnt==1
-        % For Stitching: set up canvas
-        mosaic_pieces{cnt} = uint8(zeros(nr,nc,3));
-        mosaic_pieces{cnt} = img_input{cnt};
-        H_pre = eye(3);
-        
         % Update canvas dimension
-        size_x = nc;
-        size_y = nr;
-        
+        size_x = nc*2;
+        size_y = nr + 100;
+        img_mosaic = uint8(zeros(size_y,size_x,3));
+
         % Offset of mosaic piece
-        ox(cnt) = 0;
+        ox = 0;
+        oy = 50;
+
+        % For Stitching: set up canvas
+        img_mosaic(oy+1:oy+nr, ox+1:ox+nc, :) = img_input{cnt};
+        H_pre = eye(3);
 
     elseif cnt>1
         % Feature Matching
@@ -76,17 +77,9 @@ for cnt = 1:numel(img_input)
         
         new_img_nc = max(corner_xs) - min(corner_xs);
         new_img_nr = max(corner_ys) - min(corner_ys);
-        mosaic_pieces{cnt} = uint8(zeros(new_img_nr,new_img_nc,3));
         
-        % Update final canvas dimension
-        size_x = min(corner_xs) + new_img_nc; 
-        if new_img_nr > size_y
-            size_y = new_img_nr;
-        end
-        % Offset of mosaic piece
-        ox(cnt) = ox(1) + min(corner_xs);
-
-        [tar_cols tar_rows] = meshgrid(1:new_img_nc, 1:new_img_nr);
+        [tar_cols tar_rows] = ...
+            meshgrid(ox+min(corner_xs)+1:ox+min(corner_xs)+new_img_nc,oy+1:oy+new_img_nr);
         tar_cols_list = tar_cols(:);
         tar_rows_list = tar_rows(:);
 
@@ -98,52 +91,25 @@ for cnt = 1:numel(img_input)
         tar_cols_list(leaveout) = [];
         tar_rows_list(leaveout) = [];
         
-        ind_r = sub2ind(size(mosaic_pieces{cnt}), ...
+        ind_r = sub2ind(size(img_mosaic), ...
             tar_rows_list, tar_cols_list, ones(length(tar_rows_list),1));
-        ind_g = sub2ind(size(mosaic_pieces{cnt}), ...
+        ind_g = sub2ind(size(img_mosaic), ...
             tar_rows_list, tar_cols_list, 2*ones(length(tar_rows_list),1));
-        ind_b = sub2ind(size(mosaic_pieces{cnt}), ...
+        ind_b = sub2ind(size(img_mosaic), ...
             tar_rows_list, tar_cols_list, 3*ones(length(tar_rows_list),1));
 
-        % Deal with offsets
-        src_x = src_x + min(corner_xs);
-        src_y = src_y + min(corner_ys);
         % Interpolation
         vr = interp2(src_cols, src_rows, double(img_input{cnt}(:,:,1)), src_x, src_y);
         vg = interp2(src_cols, src_rows, double(img_input{cnt}(:,:,2)), src_x, src_y);
         vb = interp2(src_cols, src_rows, double(img_input{cnt}(:,:,3)), src_x, src_y);
         
-        mosaic_pieces{cnt}(ind_r) = uint8(vr);
-        mosaic_pieces{cnt}(ind_g) = uint8(vg);
-        mosaic_pieces{cnt}(ind_b) = uint8(vb);
+        img_mosaic(ind_r) = uint8(vr);
+        img_mosaic(ind_g) = uint8(vg);
+        img_mosaic(ind_b) = uint8(vb);
         
         
-%         new_x = round(new_x) + ox;
-%         new_y = round(new_y) + oy;
-% 
-%         ind_r = sub2ind(size(img_mosaic), new_y, new_x, ones(length(new_x),1));
-%         ind_g = sub2ind(size(img_mosaic), new_y, new_x, 2*ones(length(new_x),1));
-%         ind_b = sub2ind(size(img_mosaic), new_y, new_x, 3*ones(length(new_x),1));
-% 
-%         tmp_im_r = img_input{cnt}(:,:,1);
-%         tmp_im_g = img_input{cnt}(:,:,2);
-%         tmp_im_b = img_input{cnt}(:,:,3);
-% 
-%         img_mosaic(ind_r) = tmp_im_r(:);
-%         img_mosaic(ind_g) = tmp_im_g(:);
-%         img_mosaic(ind_b) = tmp_im_b(:);
-
     end
 end
 
-% Stitching
-img_mosaic = uint8(zeros(size_y,size_x,3));
-oy = round(size_y/2-size(mosaic_pieces{1},1)/2);
-
-for frame = 1:numel(mosaic_pieces)
-    idx = numel(mosaic_pieces)-frame+1;
-    
-    img_mosaic(oy+1:oy+size(mosaic_pieces{idx},1),...
-        ox(idx)+1:ox(idx)+size(mosaic_pieces{idx},2), :) = mosaic_pieces{idx};
-end
+% img_mosaic(oy+1:oy+nr, ox+1:ox+nc, :) = img_input{1};
 
