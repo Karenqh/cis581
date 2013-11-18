@@ -79,12 +79,12 @@ for cnt = 1:numel(img_input)
         mosaic_pieces{cnt} = uint8(zeros(new_img_nr,new_img_nc,3));
         
         % Update final canvas dimension
-        size_x = size_x-min(corner_xs) + new_img_nc; 
+        size_x = min(corner_xs) + new_img_nc; 
         if new_img_nr > size_y
             size_y = new_img_nr;
         end
         % Offset of mosaic piece
-        ox(cnt) = ox(cnt-1) + min(corner_xs);
+        ox(cnt) = ox(1) + min(corner_xs);
 
         [tar_cols tar_rows] = meshgrid(1:new_img_nc, 1:new_img_nr);
         tar_cols_list = tar_cols(:);
@@ -92,16 +92,12 @@ for cnt = 1:numel(img_input)
 
         [src_x src_y] = apply_homography(inv(H_now), tar_cols(:), tar_rows(:));
         % Filter out points outside boundaries
-        tar_cols_list(src_x<1) = [];  tar_rows_list(src_x<1) = []; 
-        src_y(src_x<1) = [];   src_x(src_x<1) = []; 
-        tar_cols_list(src_x>nc) = []; tar_rows_list(src_x>nc) = [];
-        src_y(src_x>nc) = [];  src_x(src_x>nc) = [];
-
-        tar_cols_list(src_y<1) = [];  tar_rows_list(src_y<1) = [];
-        src_x(src_y<1) = [];   src_y(src_y<1) = [];
-        tar_cols_list(src_y>nr) = [];  tar_rows_list(src_y>nr) = [];
-        src_x(src_y>nr) = [];  src_y(src_y>nr) = [];
-
+        leaveout = (src_x<1 | src_x>nc | src_y<1 | src_y>nr);
+        src_x(leaveout) = [];
+        src_y(leaveout) = [];
+        tar_cols_list(leaveout) = [];
+        tar_rows_list(leaveout) = [];
+        
         ind_r = sub2ind(size(mosaic_pieces{cnt}), ...
             tar_rows_list, tar_cols_list, ones(length(tar_rows_list),1));
         ind_g = sub2ind(size(mosaic_pieces{cnt}), ...
@@ -143,8 +139,11 @@ end
 % Stitching
 img_mosaic = uint8(zeros(size_y,size_x,3));
 oy = round(size_y/2-size(mosaic_pieces{1},1)/2);
+
 for frame = 1:numel(mosaic_pieces)
     idx = numel(mosaic_pieces)-frame+1;
+    
+
     img_mosaic(oy+1:oy+size(mosaic_pieces{idx},1),...
         ox(idx)+1:ox(idx)+size(mosaic_pieces{idx},2), :) = mosaic_pieces{idx};
 end
