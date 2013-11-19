@@ -1,79 +1,131 @@
 function img_mosaic = mymosaic(img_input)
-% Preprocess:  2nd pic as the reference
-im1 = rgb2gray(img_input{2});  % Target
-im2 = rgb2gray(img_input{1});  % Source
-im3 = rgb2gray(img_input{3});  % Source
 
-%% Corner detection using Harris detector
+% Frequently used constants
+nr = size(img_input{1},1);
+nc = size(img_input{1},2);
+[src_cols src_rows] = meshgrid(1:nc, 1:nr);
+
+% For corner detection
 sigma = 2;
-cimg1 = harris(im1, sigma);
-cimg2 = harris(im2, sigma);
+max_pts = 100; % TUNE THIS!!!!!!!!!!!!!!
 
-% % Avoid the 4 image corners
-% cimg1(1,1) = 0;
-% cimg1(end,end) = 0;
-% cimg2(1,1) = 0;
-% cimg2(end,end) = 0;
+% For RANSAC
+ransac_thres = 0.5;  %0.5
 
-%% Adaptive Non-maxima Supprestion
-max_pts = 80; % TUNE THIS!!!!!!!!!!!!!!
 
-[y1 x1 ~] = anms(cimg1, max_pts);
-[y2 x2 ~] = anms(cimg2, max_pts);
+% Initialization
+y = {[]}; x = {[]};
+p = {[]}; m = {[]};
+H = {[]};
 
-disp('CORNER DETECTION DONE')
+vr = {[]};  vg = {[]};  vb = {[]};
+tar_xs = {[]};  tar_ys = {[]};
 
-%% Feature descripter
-p1 = feat_desc(im1, y1, x1);
-p2 = feat_desc(im2, y2, x2);
+for cnt = 1:numel(img_input)
+    cnt
+    % RGB to GRAY
+    img_gray = rgb2gray(img_input{cnt});
+    % Harris corner detection
+    cimg = harris(img_gray, sigma);
+    % Adaptive non-maxima suppression
+    [y{cnt} x{cnt} ~] = anms(cimg, max_pts);
+    % Feature descripter
+    p{cnt} = feat_desc(img_gray, y{cnt}, x{cnt});
+    
+    if cnt==1
+        % Update canvas dimension
+        size_x = nc;
+        size_y = nr;
 
-%% Feature Matching
-m = feat_match(p1,p2);
+        % Offset of mosaic piece
+        ox = 0;
+        oy = 0;
+    
+        H_pre = eye(3);
 
-good1 = find(m~=-1);
-good2 = m(good1);
+    elseif cnt>1
+        % Feature Matching
+        m{cnt-1} = feat_match(p{cnt-1},p{cnt});
+        good1 = find(m{cnt-1}~=-1);
+        good2 = m{cnt-1}(good1);
 
-y1s = y1(good1);  x1s = x1(good1);
-y2s = y2(good2);  x2s = x2(good2);
+        y1s = y{cnt-1}(good1);  x1s = x{cnt-1}(good1);
+        y2s = y{cnt}(good2);  x2s = x{cnt}(good2);
+        
+        % RANSAC
+        [H{cnt-1},~] = ransac_est_homography(y1s, x1s, y2s, x2s, ransac_thres);
+        
+        H_now = H_pre*H{cnt-1};
+        H_pre = H_now;
+        
+        % Stitch
+        % USE INVERSE WARPING TO AVOID HOLES
+        
+%         % DEGUGGING using MATLAB function
+%         T = maketform('projective', H_now');
+%         [h w d] = size(img_input{cnt});
+%         img_new = imtransform(img_input{cnt}, T, 'XData', [1 w], 'YData', [1 h]);
 
-disp('FEATURE MATCHING DONE')
+        
+        % First four corners (FORWARD)
+        [corner_xs corner_ys] = apply_homography(H_now,[1;1;nc;nc],[1;nr;nr;1]);
+        corner_xs = round(corner_xs);
+        corner_ys = round(corner_ys);
+        
+        new_img_nc = max(corner_xs) - min(corner_xs);
+        new_img_nr = max(corner_ys) - min(corner_ys);
+        
+        % Update canvas dimensions
+        size_x = min(corner_xs) + new_img_nc;
+        if new_img_nr>size_y
+            size_y = new_img_nr;
+            oy = max(0,-1*min(corner_ys));
+        end
+                
+        [tar_cols tar_rows] = ...
+            meshgrid(min(corner_xs)+1:min(corner_xs)+new_img_nc, ...
+                min(corner_ys)+1:min(corner_ys)+new_img_nr);
+        tar_cols_list = tar_cols(:);
+        tar_rows_list = tar_rows(:);
 
-%% RANSAC
-thresh = 0.5;
-[H,~] = ransac_est_homography(y1s, x1s, y2s, x2s, thresh);
+        [src_x src_y] = apply_homography(inv(H_now), tar_cols(:), tar_rows(:));
+        % Filter out points outside boundaries
+        leaveout = (src_x<1 | src_x>nc | src_y<1 | src_y>nr);
+        src_x(leaveout) = [];
+        src_y(leaveout) = [];
+        tar_cols_list(leaveout) = [];
+        tar_rows_list(leaveout) = [];
+        
+        % Get the RGB values from source pixels
+        % Interpolation
+        vr{cnt} = interp2(src_cols, src_rows, double(img_input{cnt}(:,:,1)), src_x, src_y);
+        vg{cnt} = interp2(src_cols, src_rows, double(img_input{cnt}(:,:,2)), src_x, src_y);
+        vb{cnt} = interp2(src_cols, src_rows, double(img_input{cnt}(:,:,3)), src_x, src_y);
+        
+        % Store the subs of source pixels
+        tar_xs{cnt} = tar_cols_list;
+        tar_ys{cnt} = tar_rows_list;
+    end
+end
 
-disp('RANSAC DONE')
-
-%% Stitch
-size_x = 1600;  size_y = 1600;
+% Stitching
+% size_y = size_y + 100;
 img_mosaic = uint8(zeros(size_y,size_x,3));
-[cols rows] = meshgrid(1:size_x, 1:size_y);
-ox = 700; oy = 700;
+% offset
+ox = 0;
 
-% Place the reference frame
-nr = size(im1,1);  nc = size(im1,2);
-img_mosaic((ox+1):(nr+ox), (oy+1):(nc+oy), :) = img_input{2};
+% 1st image
+img_mosaic(oy+1:oy+nr, ox+1:ox+nc, :) = img_input{1};
 
-% Placed the transformed other frames
-[src_cols src_rows] = meshgrid(1:size(im1,2), 1:size(im1,1));
-[src_new_x src_new_y] = apply_homography(H, src_cols(:), src_rows(:));
+for j = 2:numel(img_input)
+    ind_r = sub2ind(size(img_mosaic), ...
+        tar_ys{j}+oy, tar_xs{j}+ox, ones(length(tar_xs{j}),1));
+    ind_g = sub2ind(size(img_mosaic), ...
+        tar_ys{j}+oy, tar_xs{j}+ox, 2*ones(length(tar_xs{j}),1));
+    ind_b = sub2ind(size(img_mosaic), ...
+        tar_ys{j}+oy, tar_xs{j}+ox, 3*ones(length(tar_xs{j}),1));
 
-%%%%%%% INTERPOLATE %%%%%%%
-src_new_x = round(src_new_x) + ox;
-src_new_y = round(src_new_y) + oy;
-
-src_ind_r = sub2ind(size(img_mosaic), src_new_y, src_new_x, ones(numel(im1),1));
-src_ind_g = sub2ind(size(img_mosaic), src_new_y, src_new_x, 2*ones(numel(im1),1));
-src_ind_b = sub2ind(size(img_mosaic), src_new_y, src_new_x, 3*ones(numel(im1),1));
-
-tmp_im_r = img_input{1}(:,:,1);
-tmp_im_g = img_input{1}(:,:,2);
-tmp_im_b = img_input{1}(:,:,3);
-
-img_mosaic(src_ind_r) = tmp_im_r(:);
-img_mosaic(src_ind_g) = tmp_im_g(:);
-img_mosaic(src_ind_b) = tmp_im_b(:);
-
-
-
-
+    img_mosaic(ind_r) = uint8(vr{j});
+    img_mosaic(ind_g) = uint8(vg{j});
+    img_mosaic(ind_b) = uint8(vb{j});
+end

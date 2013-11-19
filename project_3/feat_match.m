@@ -26,7 +26,6 @@ ratio_thres = median(ratio);
 adjust_val = 0.05*ratio_thres;
 num_pts = round(0.4*sz1);
 num_qualified = sum(ratio<=ratio_thres);
-tic
 while abs(num_qualified-num_pts)>2
     % If too much
     if num_qualified - num_pts > 0
@@ -37,7 +36,6 @@ while abs(num_qualified-num_pts)>2
     end
     num_qualified = sum(ratio<=ratio_thres);
 end
-toc
 
 % Get the good matches
 m = zeros(sz1, 1);

@@ -35,7 +35,7 @@ while iter < maxIter
     elseif sum(dists<thresh)>size(inlier_ind,1)
 %         best_H = tmpH;
         inlier_ind = find(dists<thresh);
-        length(inlier_ind)
+%        length(inlier_ind)
     end
             
 end
