@@ -10,7 +10,7 @@ sigma = 2;
 max_pts = 100; % TUNE THIS!!!!!!!!!!!!!!
 
 % For RANSAC
-ransac_thres = 0.5;  %0.5
+ransac_thres = 0.8;  %0.5
 
 
 % Initialization
@@ -38,8 +38,8 @@ for cnt = 1:numel(img_input)
         size_y = nr;
 
         % Offset of mosaic piece
-        ox = 0;
         oy = 0;
+        min_height = 0;
     
         H_pre = eye(3);
 
@@ -79,8 +79,13 @@ for cnt = 1:numel(img_input)
         size_x = min(corner_xs) + new_img_nc;
         if new_img_nr>size_y
             size_y = new_img_nr;
-            oy = max(0,-1*min(corner_ys));
         end
+        
+        if min(corner_ys)<min_height
+            oy = max(0,-1*min(corner_ys));
+            min_height = min(corner_ys);
+        end
+
                 
         [tar_cols tar_rows] = ...
             meshgrid(min(corner_xs)+1:min(corner_xs)+new_img_nc, ...
