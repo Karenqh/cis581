@@ -10,7 +10,7 @@ sigma = 2;
 max_pts = 100; % TUNE THIS!!!!!!!!!!!!!!
 
 % For RANSAC
-ransac_thres = 0.2;  %0.5
+ransac_thres = 0.5;  %0.5
 
 
 % Initialization
@@ -18,6 +18,8 @@ y = {[]}; x = {[]};
 p = {[]}; m = {[]};
 H = {[]};
 
+vr = {[]};  vg = {[]};  vb = {[]};
+tar_xs = {[]};  tar_ys = {[]};
 
 for cnt = 1:numel(img_input)
     % RGB to GRAY
@@ -29,21 +31,15 @@ for cnt = 1:numel(img_input)
     % Feature descripter
     p{cnt} = feat_desc(img_gray, y{cnt}, x{cnt});
     
-    
     if cnt==1
         % Update canvas dimension
-        size_x = nc*3;
-        size_y = nr + 600;
-        img_mosaic = uint8(zeros(size_y,size_x,3));
+        size_x = nc;
+        size_y = nr;
 
         % Offset of mosaic piece
         ox = 0;
-        oy = 300;
+        oy = 0;
     
-        % For Stitching: set up canvas
-%         img_mosaic(oy+1:oy+nr, ox+1:ox+nc, :) = img_input{cnt};
-        img_mosaic(oy+1:oy+nr, ox+1:ox+nc, :) = img_input{cnt};
-
         H_pre = eye(3);
 
     elseif cnt>1
@@ -72,19 +68,22 @@ for cnt = 1:numel(img_input)
         
         % First four corners (FORWARD)
         [corner_xs corner_ys] = apply_homography(H_now,[1;1;nc;nc],[1;nr;nr;1]);
-        
         corner_xs = round(corner_xs);
         corner_ys = round(corner_ys);
         
         new_img_nc = max(corner_xs) - min(corner_xs);
         new_img_nr = max(corner_ys) - min(corner_ys);
         
-        offset_x = min(corner_xs);
-        offset_y = min(corner_ys);
-        
+        % Update canvas dimensions
+        size_x = min(corner_xs) + new_img_nc;
+        if new_img_nr>size_y
+            size_y = new_img_nr;
+            oy = max(0,-1*min(corner_ys));
+        end
+                
         [tar_cols tar_rows] = ...
-            meshgrid(offset_x+1:offset_x+new_img_nc, ...
-                offset_y+1:offset_y+new_img_nr);
+            meshgrid(min(corner_xs)+1:min(corner_xs)+new_img_nc, ...
+                min(corner_ys)+1:min(corner_ys)+new_img_nr);
         tar_cols_list = tar_cols(:);
         tar_rows_list = tar_rows(:);
 
@@ -96,24 +95,36 @@ for cnt = 1:numel(img_input)
         tar_cols_list(leaveout) = [];
         tar_rows_list(leaveout) = [];
         
-        ind_r = sub2ind(size(img_mosaic), ...
-            tar_rows_list+oy, tar_cols_list+ox, ones(length(tar_rows_list),1));
-        ind_g = sub2ind(size(img_mosaic), ...
-            tar_rows_list+oy, tar_cols_list+ox, 2*ones(length(tar_rows_list),1));
-        ind_b = sub2ind(size(img_mosaic), ...
-            tar_rows_list+oy, tar_cols_list+ox, 3*ones(length(tar_rows_list),1));
-
+        % Get the RGB values from source pixels
         % Interpolation
-        vr = interp2(src_cols, src_rows, double(img_input{cnt}(:,:,1)), src_x, src_y);
-        vg = interp2(src_cols, src_rows, double(img_input{cnt}(:,:,2)), src_x, src_y);
-        vb = interp2(src_cols, src_rows, double(img_input{cnt}(:,:,3)), src_x, src_y);
+        vr{cnt} = interp2(src_cols, src_rows, double(img_input{cnt}(:,:,1)), src_x, src_y);
+        vg{cnt} = interp2(src_cols, src_rows, double(img_input{cnt}(:,:,2)), src_x, src_y);
+        vb{cnt} = interp2(src_cols, src_rows, double(img_input{cnt}(:,:,3)), src_x, src_y);
         
-        img_mosaic(ind_r) = uint8(vr);
-        img_mosaic(ind_g) = uint8(vg);
-        img_mosaic(ind_b) = uint8(vb);
-        
-        
+        % Store the subs of source pixels
+        tar_xs{cnt} = tar_cols_list;
+        tar_ys{cnt} = tar_rows_list;
     end
 end
 
+% Stitching
+% size_y = size_y + 100;
+img_mosaic = uint8(zeros(size_y,size_x,3));
+% offset
+ox = 0;
 
+% 1st image
+img_mosaic(oy+1:oy+nr, ox+1:ox+nc, :) = img_input{1};
+
+for j = 2:numel(img_input)
+    ind_r = sub2ind(size(img_mosaic), ...
+        tar_ys{j}+oy, tar_xs{j}+ox, ones(length(tar_xs{j}),1));
+    ind_g = sub2ind(size(img_mosaic), ...
+        tar_ys{j}+oy, tar_xs{j}+ox, 2*ones(length(tar_xs{j}),1));
+    ind_b = sub2ind(size(img_mosaic), ...
+        tar_ys{j}+oy, tar_xs{j}+ox, 3*ones(length(tar_xs{j}),1));
+
+    img_mosaic(ind_r) = uint8(vr{j});
+    img_mosaic(ind_g) = uint8(vg{j});
+    img_mosaic(ind_b) = uint8(vb{j});
+end
