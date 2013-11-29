@@ -108,9 +108,9 @@ clear;
 close all;
 
 % % Read in image and convert to gray scale
-% im1 = imread('pics/1.JPG');
-% im2 = imread('pics/2.JPG');
-% im3 = imread('pics/3.JPG');
+% im1 = imread('../pics/1.JPG');
+% im2 = imread('../pics/2.JPG');
+% im3 = imread('../pics/3.JPG');
 % 
 % img_input = {[]};
 % img_input{1} = im1;
@@ -120,8 +120,8 @@ close all;
 % Read in image and convert to gray scale
 listing = dir('pennpark/*.JPG');
 img_input = {[]};
-for i=1:1:length(listing)
-    imgid = strcat('pennpark/', listing(i).name);
+for i=1:3  %length(listing)
+    imgid = strcat('pennpark/', listing(i+2).name);
     img_input{i} = imread(imgid);
 end
 
@@ -131,8 +131,6 @@ end
 img_mosaic = mymosaic(img_input);
 
 image(img_mosaic);
-
-%% Final results
 
 
 
