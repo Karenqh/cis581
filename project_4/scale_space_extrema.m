@@ -82,16 +82,15 @@ for i=1:n_octave
 
         end
     end
-    extrema_inds = inds_remain;
     
     % Get subpixel keypoints
-%     [xs ys] = subpixel_extrema(lower_layer, cur_layer, upper_layer, extrema_inds)
+%     [xs ys] = subpixel_extrema(lower_layer, cur_layer, upper_layer, inds_remain)
 
     %-------- Reject Unrobust Points -------
-    keypoints_inds = localize_keypoints(cur_dog, extrema_inds);
+    extrema_inds = localize_keypoints(cur_dog, inds_remain);
     
     %-------- Assign Orientation -------
-    blah = assign_orientation(dog{2}, keypoints_inds);
+%     blah = assign_orientation(dog{2}, keypoints_inds);
     
     
     %  dog{3}
@@ -127,8 +126,11 @@ for i=1:n_octave
 
         end
     end
-    %%%%%%%???????? store them separately??
-    extrema_inds = cat(1,extrema_inds,inds_remain);
+    %%%%%%%???????? store them separately??    
+    keypoints_inds = localize_keypoints(cur_dog, inds_remain);
+    
+    extrema_inds = cat(1,extrema_inds, keypoints_inds);
+
     
     % Obtaion extrema locations
     extrema_inds = unique(extrema_inds);
