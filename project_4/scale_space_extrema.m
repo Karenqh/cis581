@@ -1,12 +1,12 @@
 function all_extrema_inds = scale_space_extrema(input_img, n_octave, sigma0)
 
 % FLAG FOR DEBUGGING
-% debugging = true;
-debugging = false;
+debugging = true;
+% debugging = false;
 
 % Outputs
-% extrema_xs = {[]};
-% extrema_ys = {[]};
+extrema_xs = {[]};
+extrema_ys = {[]};
 all_extrema_inds = {[]};
 
 % cur_level = input_img;  
@@ -28,29 +28,32 @@ for i=1:n_octave
         g = fspecial('gaussian', [7 7], sigma0*k^(j-1));
         cur_level = imfilter(cur_level, g, 'symmetric', 'same');
         if j>1
-            dog{j-1} = cur_level - pre_level;
+            dog{j-1}.img = cur_level - pre_level;
+            dog{j-1}.scale = sigma0*k^(j-1);
+            % Mag and Ori of gradient for Orientation Assignment later
+            L_gx = [diff(pre_level,1,2), zeros(size(pre_level,1),1)];
+            L_gy = [diff(pre_level,1,1); zeros(1,size(pre_level,2))];
+            [dog{j-1}.g_dir, dog{j-1}.g_mag] = cart2pol(L_gx, L_gy);
         end
         pre_level = cur_level;
     end
     
     
     % Locate local extrema
-    nr = size(dog{1},1);
-    nc = size(dog{1},2);
+    nr = size(dog{1}.img,1);
+    nc = size(dog{1}.img,2);
     [cols_all, rows_all] = meshgrid(1:nc, 1:nr);
        
     % Candidate pixels
     [cols, rows] = meshgrid(2:nc-1, 2:nr-1);
     inds = sub2ind([nr nc], rows(:), cols(:));
        
-    %%%%%%%% We only checkt dog{2} and dog{3}
+    %%%%%%%% We only check dog{2} and dog{3}
     
     % dog{2}
-    lower_dog = dog{1};
-    cur_dog   = dog{2};
-    upper_dog = dog{3};
-    % Mark the scale
-    cur_scale = sigma0*k;
+    lower_dog = dog{1}.img;
+    cur_dog   = dog{2}.img;
+    upper_dog = dog{3}.img;
     % First grab all the candidates
     cols_remain = cols;
     rows_remain = rows;
@@ -83,12 +86,18 @@ for i=1:n_octave
     
     % Get subpixel keypoints
 %     [xs ys] = subpixel_extrema(lower_layer, cur_layer, upper_layer, extrema_inds)
+
+    %-------- Reject Unrobust Points -------
     keypoints_inds = localize_keypoints(cur_dog, extrema_inds);
     
+    %-------- Assign Orientation -------
+    blah = assign_orientation(dog{2}, keypoints_inds);
+    
+    
     %  dog{3}
-    lower_dog = dog{2};
-    cur_dog   = dog{3};
-    upper_dog = dog{4};
+    lower_dog = dog{2}.img;
+    cur_dog   = dog{3}.img;
+    upper_dog = dog{4}.img;
     % First grab all the candidates
     cols_remain = cols;
     rows_remain = rows;
@@ -124,7 +133,7 @@ for i=1:n_octave
     % Obtaion extrema locations
     extrema_inds = unique(extrema_inds);
     all_extrema_inds{i} = extrema_inds;
-%     [extrema_ys{i} extrema_xs{i}] = ind2sub([nr nc], extrema_inds);
+    [extrema_ys{i} extrema_xs{i}] = ind2sub([nr nc], extrema_inds);
    
     % DEBUGGING
     if debugging 
