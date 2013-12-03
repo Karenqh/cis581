@@ -19,11 +19,12 @@ n_octave = 4;
 sigma0 = 0.5;
 for cnt=4:numel(img_input)
     % Get the local extrema from DoG
-    [extrema_xs, extrema_ys] = scale_space_extrema(img_input{cnt}, n_octave, sigma0);
+    extrema_inds = scale_space_extrema(img_input{cnt}, n_octave, sigma0);
     
     % Interpolation to get exact locations of extremium
     
     % Reject pixels of low contrast
+    keypoints_inds = localize_keypoints(img_input{cnt}, extrema_inds);
     
     % Discard pixels along edges
     
