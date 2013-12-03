@@ -7,7 +7,7 @@ clear;
 
 listing = dir('SampleSet/SampleSet2/planar*');
 img_input = {[]};
-for i=1   %:length(listing)
+for i=1:length(listing)
     imgid = strcat('SampleSet/SampleSet2/', listing(i).name);
     img_input{i} = rgb2gray(imread(imgid));
 end
@@ -16,10 +16,10 @@ end
 
 %% Scale space extrema
 n_octave = 4;
-sigma1 = 0.5;
-for cnt=1:numel(img_input)
-    % Get the local extrema from DoG (x,y,sigma)??
-    [extrema_xs, extrema_ys] = scale_space_extrema(img_input{cnt}, n_octave, sigma1);
+sigma0 = 0.5;
+for cnt=4:numel(img_input)
+    % Get the local extrema from DoG
+    [extrema_xs, extrema_ys] = scale_space_extrema(img_input{cnt}, n_octave, sigma0);
     
     % Interpolation to get exact locations of extremium
     
