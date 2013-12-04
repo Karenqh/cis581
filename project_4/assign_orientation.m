@@ -1,4 +1,4 @@
-function KeyPoints = assign_orientation(dog, keypoints_inds)
+function KeyPoints = assign_orientation(dog, keypoints_inds, KeyPoints)
 % Collection window size = size of weighting window
 w_size = 7;
 offset = floor(w_size/2);
@@ -67,23 +67,32 @@ peak_bins = hist_ori_idx(:,1);
 peak_vals = hist_ori_sorted(:,1);
 
 % Create struct for storing ALL info of keypoints
-KeyPoints = {};
-KeyPoints.inds = keypoints_inds;
-KeyPoints.oris = ((peak_bins-19)*10 + 5)/180*pi;  % RADIAN
+if nargin<3
+    KeyPoints = {};
+    KeyPoints.location = [];
+    KeyPoints.orientation = [];
+end
+
+% Project the points back to original image
+ys = ys*dog.oct;
+xs = xs*dog.oct;
+KeyPoints.location = cat(1, KeyPoints.location, [xs ys]);
+% Record orientations (RADIAN)
+KeyPoints.orientation = cat(1,KeyPoints.orientation,((peak_bins-19)*10 + 5)/180*pi);
 
 % Grab other potentail orientations
 ratio = hist_ori_sorted(:,2)./ peak_vals;
 remains = logical(ratio>=0.8);
 while sum(remains)>0
     % Discard unused points
-    KeyPoints.inds = cat(1,KeyPoints.inds, keypoints_inds(remains));
+    KeyPoints.location = cat(1,KeyPoints.location, [xs(remains), ys(remains)]);
     peak_vals = peak_vals(remains);
     hist_ori_sorted = hist_ori_sorted(remains, 2:end);
     hist_ori_idx = hist_ori_idx(remains, 2:end);
 
     % Assign multiple orientations
     peak_bins = hist_ori_idx(:,1);
-    KeyPoints.oris = cat(1,KeyPoints.oris,((peak_bins-19)*10 + 5)/180*pi);
+    KeyPoints.orientation = cat(1,KeyPoints.orientation,((peak_bins-19)*10 + 5)/180*pi);
     
     % Next round
     ratio = hist_ori_sorted(:,2)./ peak_vals;
@@ -91,7 +100,7 @@ while sum(remains)>0
 
 end
 
-KeyPoints.scale = dog.scale*ones(size(KeyPoints.inds));
+KeyPoints.scale = dog.scale*ones(size(KeyPoints.orientation));
 
 % VISUAL DEBUGGING???
 

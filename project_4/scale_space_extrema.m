@@ -16,8 +16,8 @@ cur_level = double(input_img); % THIS SEEMES MAKES MORE SENSE
 % So scale factor is:
 k = 2^(1/4);
 
-for i=1:n_octave
-    if i>1  % Subsample BLURRED image
+for oct=1:n_octave
+    if oct>1  % Subsample BLURRED image
         cur_level = cur_level(1:2:size(cur_level,1), 1:2:size(cur_level,2));
         sigma0 = 2*sigma0;
     end
@@ -38,7 +38,7 @@ for i=1:n_octave
             % Need to blur with a Gaussian of sigma = 1.5*scale
             g_filter = fspecial('gaussian',[7 7], 1.5*sigma0*k^(j-1));
             dog{j-1}.g_mag = imfilter(dog{j-1}.g_mag,g_filter,'symmetric','same');
-
+            dog{j-1}.oct = oct;
         end
         pre_level = cur_level;
     end
@@ -134,24 +134,27 @@ for i=1:n_octave
     %%%%%%%???????? store them separately??    
     keypoints_inds_2 = localize_keypoints(cur_dog, inds_remain);
     
+    KeyPoints = assign_orientation(dog{2}, keypoints_inds_2, KeyPoints);
+
+    
     keypoints_inds = cat(1,keypoints_inds, keypoints_inds_2);
 
     
     % Obtaion extrema locations
     keypoints_inds = unique(keypoints_inds);
-    all_extrema_inds{i} = keypoints_inds;
-    [extrema_ys{i} extrema_xs{i}] = ind2sub([nr nc], keypoints_inds);
+    all_extrema_inds{oct} = keypoints_inds;
+    [extrema_ys{oct} extrema_xs{oct}] = ind2sub([nr nc], keypoints_inds);
    
     % DEBUGGING
     if debugging 
-        if i == 1
+        if oct == 1
             close all;
         end
-        figure(i)
+        figure(oct)
         imagesc(cur_level);
         colormap(gray);
         hold on;
-        plot(extrema_xs{i}, extrema_ys{i},'.');
+        plot(extrema_xs{oct}, extrema_ys{oct},'.');
         hold off;
     end
 end
