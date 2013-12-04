@@ -9,7 +9,8 @@ extrema_inds = extrema_inds( abs(cur_dog(extrema_inds)) > contrast_thres );
 %------ Eliminate points along edges
 % Approximate Hessian using difference between nerighbors
 
-%%%%%%% LET'S SEE WHICH IS FASTER
+% DIFF IS FASTER THAN imfilter
+% tic;
 nr = size(cur_dog,1);
 nc = size(cur_dog,2);
 % 1st derivative
@@ -21,8 +22,10 @@ dxy = [diff(dx,1,1); zeros(1,nc)];
 
 dyx = [diff(dy,1,2), zeros(nr,1)];
 dyy = [diff(dy,1,1); zeros(1,nc)];
+% toc;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% tic;
 % fx = [-1 1];
 % fy = [-1;1];
 % % 1st derivative
@@ -33,6 +36,7 @@ dyy = [diff(dy,1,1); zeros(1,nc)];
 % dxy = imfilter(dx, fy, 'symmetric', 'same');
 % dyy = imfilter(dy, fy, 'symmetric', 'same');
 % dyx = imfilter(dy, fx, 'symmetric', 'same');
+% toc;
 
 % Hessian Matrix
 HESSIAN = [dxx(extrema_inds)'; 

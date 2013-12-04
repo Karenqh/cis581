@@ -1,6 +1,6 @@
-%% CIS 581 PROJECT 4: LOGO REPLACEMENT
+% CIS 581 PROJECT 4: LOGO REPLACEMENT
 
-%% Read in test set
+% Read in test set
 close all;
 clc;
 clear;
@@ -14,7 +14,7 @@ end
 
 
 
-%% Scale space extrema
+% Scale space extrema
 n_octave = 4;
 sigma0 = 0.5;
 for cnt=4:numel(img_input)

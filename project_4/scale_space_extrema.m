@@ -17,15 +17,15 @@ cur_level = double(input_img); % THIS SEEMES MAKES MORE SENSE
 k = 2^(1/4);
 
 for i=1:n_octave
-    if i>1  % Sub-sample BLURRED image
+    if i>1  % Subsample BLURRED image
         cur_level = cur_level(1:2:size(cur_level,1), 1:2:size(cur_level,2));
         sigma0 = 2*sigma0;
     end
     
-    % Get DoG  !!!!!!!! The DoG is quite SPARSE... NORMAL? WHY?
+    % Get DoG
     dog = {[]};
     for j=1:5
-        g = fspecial('gaussian', [7 7], sigma0*k^(j-1));
+        g = fspecial('gaussian', [9 9], sigma0*k^(j-1));
         cur_level = imfilter(cur_level, g, 'symmetric', 'same');
         if j>1
             dog{j-1}.img = cur_level - pre_level;
@@ -34,6 +34,11 @@ for i=1:n_octave
             L_gx = [diff(pre_level,1,2), zeros(size(pre_level,1),1)];
             L_gy = [diff(pre_level,1,1); zeros(1,size(pre_level,2))];
             [dog{j-1}.g_dir, dog{j-1}.g_mag] = cart2pol(L_gx, L_gy);
+            %%%%%%%% TODO: IS THIS CORRECT???
+            % Need to blur with a Gaussian of sigma = 1.5*scale
+            g_filter = fspecial('gaussian',[7 7], 1.5*sigma0*k^(j-1));
+            dog{j-1}.g_mag = imfilter(dog{j-1}.g_mag,g_filter,'symmetric','same');
+
         end
         pre_level = cur_level;
     end
@@ -84,13 +89,13 @@ for i=1:n_octave
     end
     
     % Get subpixel keypoints
-%     [xs ys] = subpixel_extrema(lower_layer, cur_layer, upper_layer, inds_remain)
+%     [xs ys sigmas] = subpixel_extrema(lower_dog, cur_dog, upper_dog, inds_remain);
 
     %-------- Reject Unrobust Points -------
-    extrema_inds = localize_keypoints(cur_dog, inds_remain);
+    keypoints_inds = localize_keypoints(cur_dog, inds_remain);
     
     %-------- Assign Orientation -------
-%     blah = assign_orientation(dog{2}, keypoints_inds);
+    KeyPoints = assign_orientation(dog{2}, keypoints_inds);
     
     
     %  dog{3}
@@ -127,15 +132,15 @@ for i=1:n_octave
         end
     end
     %%%%%%%???????? store them separately??    
-    keypoints_inds = localize_keypoints(cur_dog, inds_remain);
+    keypoints_inds_2 = localize_keypoints(cur_dog, inds_remain);
     
-    extrema_inds = cat(1,extrema_inds, keypoints_inds);
+    keypoints_inds = cat(1,keypoints_inds, keypoints_inds_2);
 
     
     % Obtaion extrema locations
-    extrema_inds = unique(extrema_inds);
-    all_extrema_inds{i} = extrema_inds;
-    [extrema_ys{i} extrema_xs{i}] = ind2sub([nr nc], extrema_inds);
+    keypoints_inds = unique(keypoints_inds);
+    all_extrema_inds{i} = keypoints_inds;
+    [extrema_ys{i} extrema_xs{i}] = ind2sub([nr nc], keypoints_inds);
    
     % DEBUGGING
     if debugging 
