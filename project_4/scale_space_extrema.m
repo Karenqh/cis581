@@ -96,7 +96,20 @@ for oct=1:n_octave
     
     %-------- Assign Orientation -------
     KeyPoints = assign_orientation(dog{2}, keypoints_inds);
-    
+
+    % DEBUGGING
+    if debugging 
+        if oct == 1
+            close all;
+        end
+        figure(oct)
+        imagesc(cur_level);
+        colormap(gray);
+        hold on;
+        plot(KeyPoints.location(:,1), KeyPoints.location(:,2),'.');
+        key_length = length(KeyPoints.orientation);
+    end
+
     
     %  dog{3}
     lower_dog = dog{2}.img;
@@ -137,24 +150,17 @@ for oct=1:n_octave
     KeyPoints = assign_orientation(dog{2}, keypoints_inds_2, KeyPoints);
 
     
-    keypoints_inds = cat(1,keypoints_inds, keypoints_inds_2);
+%     keypoints_inds = cat(1,keypoints_inds, keypoints_inds_2);
 
     
     % Obtaion extrema locations
-    keypoints_inds = unique(keypoints_inds);
+%     keypoints_inds = unique(keypoints_inds);
     all_extrema_inds{oct} = keypoints_inds;
     [extrema_ys{oct} extrema_xs{oct}] = ind2sub([nr nc], keypoints_inds);
    
     % DEBUGGING
     if debugging 
-        if oct == 1
-            close all;
-        end
-        figure(oct)
-        imagesc(cur_level);
-        colormap(gray);
-        hold on;
-        plot(extrema_xs{oct}, extrema_ys{oct},'.');
+        plot(KeyPoints.location(key_length:end,1), KeyPoints.location(key_length:end,2),'g.');
         hold off;
     end
 end

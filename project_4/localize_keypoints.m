@@ -48,7 +48,7 @@ HESSIAN = reshape(HESSIAN, [2,2,length(extrema_inds)]);
 
 %%%%%%%%%%%% NO FOR LOOP EVER!!!
 keypoints_inds = [];
-eigen_ratio_thres = 10;
+eigen_ratio_thres = 8;
 for i=1:length(extrema_inds)
     ratio = trace(HESSIAN(:,:,i))^2 / det(HESSIAN(:,:,i));
     if ratio <= eigen_ratio_thres
