@@ -24,20 +24,6 @@ dyx = [diff(dy,1,2), zeros(nr,1)];
 dyy = [diff(dy,1,1); zeros(1,nc)];
 % toc;
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% tic;
-% fx = [-1 1];
-% fy = [-1;1];
-% % 1st derivative
-% dx = imfilter(cur_dog, fx, 'symmetric', 'same');
-% dy = imfilter(cur_dog, fy, 'symmetric', 'same');
-% % 2nd derivative
-% dxx = imfilter(dx, fx, 'symmetric', 'same');
-% dxy = imfilter(dx, fy, 'symmetric', 'same');
-% dyy = imfilter(dy, fy, 'symmetric', 'same');
-% dyx = imfilter(dy, fx, 'symmetric', 'same');
-% toc;
-
 % Hessian Matrix
 HESSIAN = [dxx(extrema_inds)'; 
            dyx(extrema_inds)'; 

@@ -146,15 +146,10 @@ for oct=1:n_octave
     end
     %%%%%%%???????? store them separately??    
     keypoints_inds_2 = localize_keypoints(cur_dog, inds_remain);
-    
     KeyPoints = assign_orientation(dog{2}, keypoints_inds_2, KeyPoints);
 
     
-%     keypoints_inds = cat(1,keypoints_inds, keypoints_inds_2);
-
-    
     % Obtaion extrema locations
-%     keypoints_inds = unique(keypoints_inds);
     all_extrema_inds{oct} = keypoints_inds;
     [extrema_ys{oct} extrema_xs{oct}] = ind2sub([nr nc], keypoints_inds);
    
