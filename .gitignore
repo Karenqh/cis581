@@ -7,3 +7,6 @@ BSDS300
 
 # Compressed files
 *.zip
+
+# PDF
+*paper
