@@ -65,34 +65,34 @@ end
 [hist_ori_sorted, hist_ori_idx] = sort(hist_ori,2, 'descend');
 peak_bins = hist_ori_idx(:,1);
 peak_vals = hist_ori_sorted(:,1);
+% TODO: PARABOLA FIT on peak 
 
 % Create struct for storing ALL info of keypoints
-if nargin<3
-    KeyPoints = {};
-    KeyPoints.location = [];
-    KeyPoints.orientation = [];
-end
+cnt = numel(KeyPoints)+1;
+KeyPoints{cnt} = {};
+KeyPoints{cnt}.location = [];
+KeyPoints{cnt}.orientation = [];
 
 % Project the points back to original image
 ys = ys*dog.oct;
 xs = xs*dog.oct;
-KeyPoints.location = cat(1, KeyPoints.location, [xs ys]);
+KeyPoints{cnt}.location = cat(1, KeyPoints{cnt}.location, [xs ys]);
 % Record orientations (RADIAN)
-KeyPoints.orientation = cat(1,KeyPoints.orientation,((peak_bins-19)*10 + 5)/180*pi);
+KeyPoints{cnt}.orientation = cat(1,KeyPoints{cnt}.orientation,((peak_bins-19)*10 + 5)/180*pi);
 
 % Grab other potentail orientations
 ratio = hist_ori_sorted(:,2)./ peak_vals;
 remains = logical(ratio>=0.8);
 while sum(remains)>0
     % Discard unused points
-    KeyPoints.location = cat(1,KeyPoints.location, [xs(remains), ys(remains)]);
+    KeyPoints{cnt}.location = cat(1,KeyPoints{cnt}.location, [xs(remains), ys(remains)]);
     peak_vals = peak_vals(remains);
     hist_ori_sorted = hist_ori_sorted(remains, 2:end);
     hist_ori_idx = hist_ori_idx(remains, 2:end);
 
     % Assign multiple orientations
     peak_bins = hist_ori_idx(:,1);
-    KeyPoints.orientation = cat(1,KeyPoints.orientation,((peak_bins-19)*10 + 5)/180*pi);
+    KeyPoints{cnt}.orientation = cat(1,KeyPoints{cnt}.orientation,((peak_bins-19)*10 + 5)/180*pi);
     
     % Next round
     ratio = hist_ori_sorted(:,2)./ peak_vals;
@@ -100,9 +100,8 @@ while sum(remains)>0
 
 end
 
-KeyPoints.scale = dog.scale*ones(size(KeyPoints.orientation));
+KeyPoints{cnt}.scale = dog.scale*ones(size(KeyPoints{cnt}.orientation));
 
-% VISUAL DEBUGGING???
 
 
 

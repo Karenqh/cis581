@@ -5,7 +5,9 @@ close all;
 clc;
 clear;
 
-listing = dir('SampleSet/SampleSet2/planar*');
+% listing = dir('SampleSet/SampleSet2/planar*');
+listing = dir('SampleSet/SampleSet2/Reference*');
+
 img_input = {[]};
 for i=1:length(listing)
     imgid = strcat('SampleSet/SampleSet2/', listing(i).name);
@@ -15,15 +17,15 @@ end
 
 
 % Scale space extrema
-n_octave = 4;   % AS MANY AS POSSIBLE
+n_octave = 6;   % AS MANY AS POSSIBLE
 sigma0 = 0.5;
-for cnt=4:numel(img_input)
+for cnt=1:numel(img_input)
     % Extract Keypoints with Location, Orientation, Scale
     extrema_inds = extract_keypoints(img_input{cnt}, n_octave, sigma0);
     
-    % Interpolation to get exact locations of extremium
-        
-    % Discard pixels along edges
+    % Greate descriptors
     
+    
+    % Match keypoints
     
 end

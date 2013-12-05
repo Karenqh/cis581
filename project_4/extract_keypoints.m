@@ -16,6 +16,7 @@ cur_level = double(input_img); % THIS SEEMES MAKES MORE SENSE
 % So scale factor is:
 k = 2^(1/4);
 
+KeyPoints = {};
 for oct=1:n_octave
     if oct>1  % Subsample BLURRED image
         cur_level = cur_level(1:2:size(cur_level,1), 1:2:size(cur_level,2));
@@ -95,11 +96,7 @@ for oct=1:n_octave
     keypoints_inds = localize_keypoints(cur_dog, inds_remain);
     
     %-------- Assign Orientation -------
-    if oct==1
-        KeyPoints = assign_orientation(dog{2}, keypoints_inds);
-    else
-        KeyPoints = assign_orientation(dog{2}, keypoints_inds, KeyPoints);
-    end
+    KeyPoints = assign_orientation(dog{2}, keypoints_inds, KeyPoints);
 
     % DEBUGGING
     if debugging 
@@ -110,12 +107,13 @@ for oct=1:n_octave
         imagesc(cur_level);
         colormap(gray);
         hold on;
-        plot(KeyPoints.location(:,1), KeyPoints.location(:,2),'.');
-        key_length = length(KeyPoints.orientation);
+        cnt = numel(KeyPoints);
+        plot(KeyPoints{cnt}.location(:,1), KeyPoints{cnt}.location(:,2),'.');
+%         key_length = length(KeyPoints.orientation);
         
         % Plot the arrows indicating orientations
-        [u v] = pol2cart(KeyPoints.orientation,dog{2}.oct*length(KeyPoints.orientation));
-        quiver(KeyPoints.location(:,1), KeyPoints.location(:,2), u, v);
+        [u v] = pol2cart(KeyPoints{cnt}.orientation,dog{2}.oct);
+        quiver(KeyPoints{cnt}.location(:,1), KeyPoints{cnt}.location(:,2), u, v);
     end
 
     
@@ -138,6 +136,7 @@ for oct=1:n_octave
             new_rows = rows_remain+dy;
             new_inds = sub2ind([nr nc], new_rows(:), new_cols(:));
 
+            % SOMETHING WRONG HERE !!!!!
             inds_maxima = inds_remain(cur_dog(inds_remain)>=cur_dog(new_inds)&...
                                cur_dog(inds_remain)>lower_dog(new_inds)&...
                                cur_dog(inds_remain)>upper_dog(new_inds));
@@ -154,14 +153,15 @@ for oct=1:n_octave
     end
     %%%%%%%???????? store them separately??    
     keypoints_inds_2 = localize_keypoints(cur_dog, inds_remain);
-    KeyPoints = assign_orientation(dog{2}, keypoints_inds_2, KeyPoints);
+    KeyPoints = assign_orientation(dog{3}, keypoints_inds_2, KeyPoints);
    
     % DEBUGGING
     if debugging 
-        plot(KeyPoints.location(key_length:end,1), KeyPoints.location(key_length:end,2),'g.');
+        cnt = numel(KeyPoints);
+        plot(KeyPoints{cnt}.location(:,1), KeyPoints{cnt}.location(:,2),'g.');
         % Plot the arrows indicating orientations
-        [u v] = pol2cart(KeyPoints.orientation(key_length:end),dog{3}.oct*length(KeyPoints.orientation(key_length:end)));
-        quiver(KeyPoints.location(key_length:end,1), KeyPoints.location(key_length:end,2), u, v);
+        [u v] = pol2cart(KeyPoints{cnt}.orientation,dog{3}.oct);
+        quiver(KeyPoints{cnt}.location(:,1), KeyPoints{cnt}.location(:,2), u, v);
 
         hold off;
     end
