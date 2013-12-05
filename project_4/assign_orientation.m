@@ -100,7 +100,7 @@ while sum(remains)>0
 
 end
 
-KeyPoints{cnt}.scale = dog.scale*ones(size(KeyPoints{cnt}.orientation));
+KeyPoints{cnt}.scale = dog.scale;
 
 
 

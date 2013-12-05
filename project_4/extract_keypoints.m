@@ -112,7 +112,7 @@ for oct=1:n_octave
 %         key_length = length(KeyPoints.orientation);
         
         % Plot the arrows indicating orientations
-        [u v] = pol2cart(KeyPoints{cnt}.orientation,dog{2}.oct);
+        [u v] = pol2cart(KeyPoints{cnt}.orientation, KeyPoints{cnt}.scale);
         quiver(KeyPoints{cnt}.location(:,1), KeyPoints{cnt}.location(:,2), u, v);
     end
 
@@ -160,7 +160,7 @@ for oct=1:n_octave
         cnt = numel(KeyPoints);
         plot(KeyPoints{cnt}.location(:,1), KeyPoints{cnt}.location(:,2),'g.');
         % Plot the arrows indicating orientations
-        [u v] = pol2cart(KeyPoints{cnt}.orientation,dog{3}.oct);
+        [u v] = pol2cart(KeyPoints{cnt}.orientation, KeyPoints{cnt}.scale);
         quiver(KeyPoints{cnt}.location(:,1), KeyPoints{cnt}.location(:,2), u, v);
 
         hold off;

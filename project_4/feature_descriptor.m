@@ -1,21 +1,27 @@
-function feature_descriptor(input_img, KeyPoints)
+function feature_descriptor(im, KeyPoints)
 
-nr = size(input_img,1);
-nc = size(input_img,2);
+nr = size(im,1);
+nc = size(im,2);
+w_size = 32;  %????????
 
-% Image blurring: gaussian filter level depending on scale
+for cnt = 1:numel(KeyPoints)
+    % Image blurring: gaussian filter level depending on scale
+    scale = KeyPoints{cnt}.scale;
+    h = fspecial('gaussian', [5 5], scale*1.5);  % TUNE
+    im = imfilter(im, h, 'symmetric', 'same');
 
-% Precompute gradients of input image
+    % Compute gradients of input image
+    gx = [diff(im,1,2), zeros(nr,1)];
+    gy = [diff(im,1,1); zeros(1,nc)];
+    [g_dir, g_mag] = cart2pol(gx, gy);
 
 
-% 1st derivative
-gx = [diff(input_img,1,2), zeros(nr,1)];
-gy = [diff(input_img,1,1); zeros(1,nc)];
+    % Sample around keypoints
+    
 
 
-
-
-% Orientation invariance: rotate relative to keypoint orientation
+    % Orientation invariance: rotate relative to keypoint orientation
 
 
 %
+end
