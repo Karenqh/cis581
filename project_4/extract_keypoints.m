@@ -1,13 +1,13 @@
-function all_extrema_inds = scale_space_extrema(input_img, n_octave, sigma0)
+function KeyPoints = extract_keypoints(input_img, n_octave, sigma0)
 
 % FLAG FOR DEBUGGING
 debugging = true;
 % debugging = false;
 
-% Outputs
-extrema_xs = {[]};
-extrema_ys = {[]};
-all_extrema_inds = {[]};
+% % Outputs
+% extrema_xs = {[]};
+% extrema_ys = {[]};
+% all_extrema_inds = {[]};
 
 % cur_level = input_img;  
 cur_level = double(input_img); % THIS SEEMES MAKES MORE SENSE
@@ -95,7 +95,11 @@ for oct=1:n_octave
     keypoints_inds = localize_keypoints(cur_dog, inds_remain);
     
     %-------- Assign Orientation -------
-    KeyPoints = assign_orientation(dog{2}, keypoints_inds);
+    if oct==1
+        KeyPoints = assign_orientation(dog{2}, keypoints_inds);
+    else
+        KeyPoints = assign_orientation(dog{2}, keypoints_inds, KeyPoints);
+    end
 
     % DEBUGGING
     if debugging 
@@ -151,11 +155,6 @@ for oct=1:n_octave
     %%%%%%%???????? store them separately??    
     keypoints_inds_2 = localize_keypoints(cur_dog, inds_remain);
     KeyPoints = assign_orientation(dog{2}, keypoints_inds_2, KeyPoints);
-
-    
-    % Obtaion extrema locations
-    all_extrema_inds{oct} = keypoints_inds;
-    [extrema_ys{oct} extrema_xs{oct}] = ind2sub([nr nc], keypoints_inds);
    
     % DEBUGGING
     if debugging 
