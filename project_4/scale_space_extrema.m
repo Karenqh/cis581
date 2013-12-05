@@ -108,6 +108,10 @@ for oct=1:n_octave
         hold on;
         plot(KeyPoints.location(:,1), KeyPoints.location(:,2),'.');
         key_length = length(KeyPoints.orientation);
+        
+        % Plot the arrows indicating orientations
+        [u v] = pol2cart(KeyPoints.orientation,dog{2}.oct*length(KeyPoints.orientation));
+        quiver(KeyPoints.location(:,1), KeyPoints.location(:,2), u, v);
     end
 
     
@@ -156,6 +160,10 @@ for oct=1:n_octave
     % DEBUGGING
     if debugging 
         plot(KeyPoints.location(key_length:end,1), KeyPoints.location(key_length:end,2),'g.');
+        % Plot the arrows indicating orientations
+        [u v] = pol2cart(KeyPoints.orientation(key_length:end),dog{3}.oct*length(KeyPoints.orientation(key_length:end)));
+        quiver(KeyPoints.location(key_length:end,1), KeyPoints.location(key_length:end,2), u, v);
+
         hold off;
     end
 end

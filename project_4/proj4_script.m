@@ -15,7 +15,7 @@ end
 
 
 % Scale space extrema
-n_octave = 4;
+n_octave = 4;   % AS MANY AS POSSIBLE
 sigma0 = 0.5;
 for cnt=4:numel(img_input)
     % Get the local extrema from DoG
