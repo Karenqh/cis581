@@ -21,10 +21,10 @@ n_octave = 6;   % AS MANY AS POSSIBLE
 sigma0 = 0.5;
 for cnt=1:numel(img_input)
     % Extract Keypoints with Location, Orientation, Scale
-    extrema_inds = extract_keypoints(img_input{cnt}, n_octave, sigma0);
+    KeyPoints = extract_keypoints(img_input{cnt}, n_octave, sigma0);
     
     % Greate descriptors
-    
+    blah = feature_descriptor(double(img_input{cnt}), KeyPoints);
     
     % Match keypoints
     

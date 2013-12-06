@@ -17,7 +17,6 @@ neighbor_g_dir = [];
 neighbor_g_mag = [];
 for dx = -offset:offset
     for dy = -offset:offset
-        % WHAT ABOUT POINTS OUTSIDE OF BOUNDARIES
         ys_new = ys + dy;
         xs_new = xs + dx;
         
