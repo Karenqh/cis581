@@ -1,8 +1,8 @@
 function KeyPoints = extract_keypoints(input_img, n_octave, sigma0)
 
 % FLAG FOR DEBUGGING
-% debugging = true;
-debugging = false;
+debugging = true;
+% debugging = false;
 
 % % Outputs
 % extrema_xs = {[]};

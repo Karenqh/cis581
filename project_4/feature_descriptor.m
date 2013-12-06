@@ -75,22 +75,21 @@ for cnt = 1:numel(KeyPoints)
         hist_prep = floor(patch_dir/bin_unit); 
 
         for h=-4:4
-            dir_tmp = zeros(size(patch_dir));
-            dir_tmp(hist_prep==h) = 1;
+            mag_tmp = patch_mag;
+            mag_tmp(hist_prep~=h) = 0;
             % Store the values for this bin
             % TRILINIEAR INTERPOLATION
             if h==4
                 interp_weight = 1- abs(patch_dir-pi*7/8)/bin_unit;
-                hist_ori(h+4,:) = sum(dir_tmp.*patch_mag.*interp_weight);
+                hist_ori(h+4,:) = sum(mag_tmp.*interp_weight);
             else
                 bin_centers = (hist_prep+1/2)*bin_unit;
                 interp_weight = 1-abs(patch_dir-bin_centers)/bin_unit;
-                hist_ori(h+5,:) = sum(dir_tmp.*patch_mag.*interp_weight);
+                hist_ori(h+5,:) = sum(mat_tmp.*interp_weight);
             end
         end
         
         % Reshape into vector and Normalization
-%         descriptor = hist_ori(:)/norm(hist_ori(:));
         descriptor = hist_ori(:)/max(hist_ori(:));
         % Illumination invariance by CLAMP on gradients
         descriptor(descriptor>0.2) = 0.2;

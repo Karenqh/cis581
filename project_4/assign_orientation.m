@@ -48,15 +48,13 @@ hist_prep = floor(neighbor_g_dir/10);
 % I KNOW THIS IS KINDA STUPID
 for h=-18:18
     % DON'T FORGET THE 36
-    g_dir_tmp = neighbor_g_dir;
     g_mag_tmp = neighbor_g_mag;
-    g_dir_tmp(hist_prep~=h) = 0;
     g_mag_tmp(hist_prep~=h) = 0;
     % Store the values for this bin
     if h==18
-        hist_ori(:,h+18) = sum(g_dir_tmp.*g_mag_tmp, 2);
+        hist_ori(:,h+18) = sum(g_mag_tmp, 2);
     else
-        hist_ori(:,h+19) = sum(g_dir_tmp.*g_mag_tmp, 2);
+        hist_ori(:,h+19) = sum(g_mag_tmp, 2);
     end
 end
 
