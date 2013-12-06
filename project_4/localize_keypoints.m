@@ -32,12 +32,18 @@ HESSIAN = [dxx(extrema_inds)';
        
 HESSIAN = reshape(HESSIAN, [2,2,length(extrema_inds)]);
 
-%%%%%%%%%%%% NO FOR LOOP EVER!!!
+%%% STUPID LOOP !!!
 keypoints_inds = [];
-eigen_ratio_thres = 10;  % TUNE THIS
+eigen_ratio_thres = 12;  % TUNE THIS
+cnt = 0;
 for i=1:length(extrema_inds)
     ratio = trace(HESSIAN(:,:,i))^2 / det(HESSIAN(:,:,i));
-    if ratio <= eigen_ratio_thres
+    % Dicard the points with negative determinant
+    if ratio<=0
+        continue;
+    elseif ratio < eigen_ratio_thres
+        cnt = cnt + 1;
         keypoints_inds = cat(1, keypoints_inds, extrema_inds(i));
     end
 end
+

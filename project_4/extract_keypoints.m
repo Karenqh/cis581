@@ -72,6 +72,8 @@ for oct=1:n_octave
         cols_remain = cols;
         rows_remain = rows;
         inds_remain = inds;
+        
+        % TODO: USE meshgrid to speed up
         for dx=-1:1
             for dy=-1:1
                 if isempty(inds_remain)

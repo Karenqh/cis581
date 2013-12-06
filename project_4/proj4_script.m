@@ -5,8 +5,8 @@ close all;
 clc;
 clear;
 
-listing = dir('SampleSet/SampleSet2/planar*');
-% listing = dir('SampleSet/SampleSet2/Reference*');
+% listing = dir('SampleSet/SampleSet2/planar*');
+listing = dir('SampleSet/SampleSet2/Reference*');
 
 img_input = {[]};
 for i=1:length(listing)
@@ -19,7 +19,7 @@ end
 smoother = fspecial('gaussian', [5 5], 0.5);
 % Scale space extrema
 sigma0 = 1.6;
-for cnt=5:numel(img_input)
+for cnt=1:numel(img_input)
     % Pre-smooth input image
     input_img = imfilter(img_input{cnt}, smoother,'symmetric','same');
     
