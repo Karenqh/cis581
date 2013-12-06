@@ -5,8 +5,8 @@ close all;
 clc;
 clear;
 
-% listing = dir('SampleSet/SampleSet2/planar*');
-listing = dir('SampleSet/SampleSet2/Reference*');
+listing = dir('SampleSet/SampleSet2/planar*');
+% listing = dir('SampleSet/SampleSet2/Reference*');
 
 img_input = {[]};
 for i=1:length(listing)
@@ -17,11 +17,19 @@ end
 
 
 % Scale space extrema
-n_octave = 6;   % AS MANY AS POSSIBLE
-sigma0 = 0.5;
-for cnt=1:numel(img_input)
+sigma0 = 1.6;
+for cnt=5:numel(img_input)
+    % Pre-smooth input image
+    smoother = fspecial('gaussian', [5 5], 0.5);
+    input_img = imfilter(img_input{cnt}, smoother,'symmetric','same');
+    
+    % Determine number of octaves
+    [nr nc] = size(input_img);
+    n_octave = log2(min(nr, nc));
+    disp(n_octave)
+    
     % Extract Keypoints with Location, Orientation, Scale
-    KeyPoints = extract_keypoints(img_input{cnt}, n_octave, sigma0);
+    KeyPoints = extract_keypoints(input_img, n_octave, sigma0);
     
     % Greate descriptors
     blah = feature_descriptor(double(img_input{cnt}), KeyPoints);

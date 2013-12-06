@@ -80,12 +80,12 @@ for cnt = 1:numel(KeyPoints)
             % Store the values for this bin
             % TRILINIEAR INTERPOLATION
             if h==4
-                interp_weight = 1- abs(patch_dir-pi*7/8)/bin_unit;
+                interp_weight = 1 - abs(patch_dir-pi*7/8)/bin_unit;
                 hist_ori(h+4,:) = sum(mag_tmp.*interp_weight);
             else
                 bin_centers = (hist_prep+1/2)*bin_unit;
-                interp_weight = 1-abs(patch_dir-bin_centers)/bin_unit;
-                hist_ori(h+5,:) = sum(mat_tmp.*interp_weight);
+                interp_weight = 1 - abs(patch_dir-bin_centers)/bin_unit;
+                hist_ori(h+5,:) = sum(mag_tmp.*interp_weight);
             end
         end
         
