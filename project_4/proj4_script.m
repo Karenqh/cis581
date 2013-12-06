@@ -15,17 +15,17 @@ for i=1:length(listing)
 end
 
 
-
+% First round smoothing
+smoother = fspecial('gaussian', [5 5], 0.5);
 % Scale space extrema
 sigma0 = 1.6;
 for cnt=5:numel(img_input)
     % Pre-smooth input image
-    smoother = fspecial('gaussian', [5 5], 0.5);
     input_img = imfilter(img_input{cnt}, smoother,'symmetric','same');
     
     % Determine number of octaves
     [nr nc] = size(input_img);
-    n_octave = log2(min(nr, nc));
+    n_octave = round( log2(min(nr, nc)) );
     disp(n_octave)
     
     % Extract Keypoints with Location, Orientation, Scale
