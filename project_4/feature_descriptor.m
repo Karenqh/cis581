@@ -1,4 +1,4 @@
-function [g_weight] = feature_descriptor(im, KeyPoints)
+function Descriptors = feature_descriptor(im, KeyPoints) % SPECIFY LOCATION, SCALE, ORIENTATION
 nr = size(im,1);
 nc = size(im,2);
 [cols rows] = meshgrid(1:nc, 1:nr);
@@ -103,5 +103,3 @@ for cnt = 1:numel(KeyPoints)
     
 end
 toc;
-
-debugging = false;

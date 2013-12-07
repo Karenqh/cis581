@@ -107,7 +107,7 @@ for oct=1:n_octave
         end
 
         % Get subpixel keypoints
-    %     [xs ys sigmas] = subpixel_extrema(lower_dog, cur_dog, upper_dog, inds_remain);
+        [xs ys sigmas] = subpixel_extrema(lower_dog, cur_dog, upper_dog, inds_remain);
 
         %-------- Reject Unrobust Points -------
         keypoints_inds = localize_keypoints(cur_dog, inds_remain);
