@@ -50,21 +50,29 @@ for idx = 1:numel(dxs)
 
 end
 
+% Gaussian weighting the magnitude
+neighbor_g_mag = bsxfun(@times, neighbor_g_mag,g_weight(:)');
 
 % Generate Orientation Histogram
 hist_ori = zeros(length(keypoints_inds),36);
-hist_prep = floor(neighbor_g_dir/10);
+hist_prep = floor(neighbor_g_dir/10);  % #keys-by-#neighbors
 
 % I KNOW THIS IS KINDA STUPID
+bin_length = 10; % degree
 for h=-18:18
     % DON'T FORGET THE 36
     g_mag_tmp = neighbor_g_mag;
     g_mag_tmp(hist_prep~=h) = 0;
     % Store the values for this bin
     if h==18
-        hist_ori(:,h+18) = sum(g_mag_tmp*g_weight(:), 2);
+        % Interpolation
+        interp_weight = 1- abs(neighbor_g_dir-355)/bin_length;
+        hist_ori(:,h+18) = sum(g_mag_tmp.*interp_weight, 2);
     else
-        hist_ori(:,h+19) = sum(g_mag_tmp*g_weight(:), 2);
+        bin_centers = (hist_prep+0.5)*bin_length;
+        interp_weight = 1 - abs(neighbor_g_dir-bin_centers)/bin_length;
+
+        hist_ori(:,h+19) = sum(g_mag_tmp.*interp_weight, 2);
     end
 end
 
@@ -72,7 +80,6 @@ end
 [hist_ori_sorted, hist_ori_idx] = sort(hist_ori,2, 'descend');
 peak_bins = hist_ori_idx(:,1);
 peak_vals = hist_ori_sorted(:,1);
-% TODO: PARABOLA FIT on peak 
 
 % Create struct for storing ALL info of keypoints
 cnt = numel(KeyPoints)+1;

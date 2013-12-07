@@ -71,12 +71,12 @@ for cnt = 1:numel(KeyPoints)
             end
         end
         
-        bin_unit = pi/4;
+        bin_length = pi/4;
 
         % 8-by-16
         hist_ori = zeros(8,16);
         % 16x16, each COLOMN is a sub-window among 4x4 windows
-        hist_prep = floor(patch_dir/bin_unit); 
+        hist_prep = floor(patch_dir/bin_length); 
 
         for h=-4:4
             mag_tmp = patch_mag;
@@ -84,11 +84,11 @@ for cnt = 1:numel(KeyPoints)
             % Store the values for this bin
             % TRILINIEAR INTERPOLATION
             if h==4
-                interp_weight = 1 - abs(patch_dir-pi*7/8)/bin_unit;
+                interp_weight = 1 - abs(patch_dir-pi*7/8)/bin_length;
                 hist_ori(h+4,:) = sum(mag_tmp.*interp_weight);
             else
-                bin_centers = (hist_prep+1/2)*bin_unit;
-                interp_weight = 1 - abs(patch_dir-bin_centers)/bin_unit;
+                bin_centers = (hist_prep+1/2)*bin_length;
+                interp_weight = 1 - abs(patch_dir-bin_centers)/bin_length;
                 hist_ori(h+5,:) = sum(mag_tmp.*interp_weight);
             end
         end
