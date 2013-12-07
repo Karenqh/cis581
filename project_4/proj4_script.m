@@ -16,7 +16,7 @@ end
 
 
 % First round smoothing
-smoother = fspecial('gaussian', [5 5], 0.5);
+smoother = fspecial('gaussian', [3 3], 0.5);
 % Scale space extrema
 sigma0 = 1.6;
 for cnt=1:numel(img_input)

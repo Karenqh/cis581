@@ -34,7 +34,7 @@ HESSIAN = reshape(HESSIAN, [2,2,length(extrema_inds)]);
 
 %%% STUPID LOOP !!!
 keypoints_inds = [];
-eigen_ratio_thres = 12;  % TUNE THIS
+eigen_ratio_thres = 15;  % TUNE THIS
 cnt = 0;
 for i=1:length(extrema_inds)
     ratio = trace(HESSIAN(:,:,i))^2 / det(HESSIAN(:,:,i));

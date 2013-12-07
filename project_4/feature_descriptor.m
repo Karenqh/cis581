@@ -12,8 +12,12 @@ tic;
 Descriptors = {[]};
 for cnt = 1:numel(KeyPoints)
     % Image blurring: gaussian filter level depending on scale
-    scale = KeyPoints{cnt}.scale;
-    h = fspecial('gaussian', [5 5], scale*1.5);  % TUNE
+    sigma_now = 1.5*KeyPoints{cnt}.scale;
+    f_size = round(6*sigma_now);
+    if mod(f_size,2)==0
+        f_size=f_size-1;
+    end
+    h = fspecial('gaussian', [f_size f_size], sigma_now);  % TUNE
     im = imfilter(im, h, 'symmetric', 'same');
 
     % Compute gradients of input image

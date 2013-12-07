@@ -1,9 +1,18 @@
 function KeyPoints = assign_orientation(dog, keypoints_inds, KeyPoints)
-% Collection window size = size of weighting window
-w_size = 7;
-offset = floor(w_size/2);
 
-% g_dir is within [-pi, pi] !!!!
+% Generate gaussian weighting function
+weight_sigma = 1.5*dog.scale;
+weight_size = round(6*weight_sigma);
+% Make sure window size is odd
+if mod(weight_size,2)==0
+    weight_size = weight_size-1;
+end
+offset = floor(weight_size/2);
+% Generate gaussian weighting function
+g_weight = fspecial('gaussian', [weight_size weight_size], weight_sigma);
+
+
+% Gradient direction is within [-pi, pi] !!!
 g_dir = dog.g_dir/pi*180;  % degree 
 g_mag = dog.g_mag;
 
@@ -12,34 +21,35 @@ g_mag = dog.g_mag;
 [ys xs] = ind2sub([nr nc], keypoints_inds);
 
 
-% Grab gradient info of neighbors within the 7x7 window
-neighbor_g_dir = [];
+% Grab gradient info of neighbors within the Gaussian window
+neighbor_g_dir = [];  % to be ?-by-?
 neighbor_g_mag = [];
-for dx = -offset:offset
-    for dy = -offset:offset
-        ys_new = ys + dy;
-        xs_new = xs + dx;
-        
-        % Discard points too close to boundaries
-        bad_pts = logical(xs_new<1 | xs_new>nc | ys_new<1 | ys_new>nr);
-        xs_new(bad_pts) = [];
-        ys_new(bad_pts) = [];
-        % Discard bad points thoroughly
-        xs(bad_pts)= [];
-        ys(bad_pts) = [];
-        keypoints_inds(bad_pts) = [];
-        if ~isempty(neighbor_g_dir)
-            neighbor_g_dir(bad_pts,:) = [];
-            neighbor_g_mag(bad_pts,:) = [];
-        end
-        
-        neighbor_inds = sub2ind([nr nc], ys_new, xs_new);
-        neighbor_g_dir = cat(2,neighbor_g_dir, g_dir(neighbor_inds));
-        neighbor_g_mag = cat(2,neighbor_g_mag, g_mag(neighbor_inds));
-        
- 
+% Reduce 2 loops into 1, and reserve the correct order
+[dxs dys] = meshgrid(-offset:offset, -offset:offset);
+
+for idx = 1:numel(dxs)
+    ys_new = ys + dys(idx);
+    xs_new = xs + dxs(idx);
+
+    % Discard points too close to boundaries
+    bad_pts = logical(xs_new<1 | xs_new>nc | ys_new<1 | ys_new>nr);
+    xs_new(bad_pts) = [];
+    ys_new(bad_pts) = [];
+    % Discard bad points thoroughly
+    xs(bad_pts)= [];
+    ys(bad_pts) = [];
+    keypoints_inds(bad_pts) = [];
+    if ~isempty(neighbor_g_dir)
+        neighbor_g_dir(bad_pts,:) = [];
+        neighbor_g_mag(bad_pts,:) = [];
     end
+
+    neighbor_inds = sub2ind([nr nc], ys_new, xs_new);
+    neighbor_g_dir = cat(2,neighbor_g_dir, g_dir(neighbor_inds));
+    neighbor_g_mag = cat(2,neighbor_g_mag, g_mag(neighbor_inds));
+
 end
+
 
 % Generate Orientation Histogram
 hist_ori = zeros(length(keypoints_inds),36);
@@ -52,9 +62,9 @@ for h=-18:18
     g_mag_tmp(hist_prep~=h) = 0;
     % Store the values for this bin
     if h==18
-        hist_ori(:,h+18) = sum(g_mag_tmp, 2);
+        hist_ori(:,h+18) = sum(g_mag_tmp*g_weight(:), 2);
     else
-        hist_ori(:,h+19) = sum(g_mag_tmp, 2);
+        hist_ori(:,h+19) = sum(g_mag_tmp*g_weight(:), 2);
     end
 end
 

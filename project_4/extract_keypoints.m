@@ -31,23 +31,22 @@ for oct=1:n_octave
     dog = {[]};
     for j=0:5
         sigma_now = sigma0*k^(j-1+oct-1);
-        g = fspecial('gaussian', [9 9], sigma_now);
+        f_size = round(6*sigma_now);
+        if mod(f_size,2)==0
+            f_size = f_size-1;
+        end
+        g = fspecial('gaussian', [f_size f_size], sigma_now);
         cur_level = imfilter(pre_level, g, 'symmetric', 'same');
         
         if j>0
             dog{j}.img = cur_level - pre_level;
             dog{j}.scale = sigma_now/k;
+            dog{j}.oct = oct;
+            
             % Mag and Ori of gradient for Orientation Assignment later
             L_gx = [diff(pre_level,1,2), zeros(size(pre_level,1),1)];
             L_gy = [diff(pre_level,1,1); zeros(1,size(pre_level,2))];
-            [dog{j}.g_dir, dog{j}.g_mag] = cart2pol(L_gx, L_gy);
-
-    %             %%%%%%%% TODO: IS THIS CORRECT???
-    %             % Need to blur with a Gaussian of sigma = 1.5*scale
-    %             g_filter = fspecial('gaussian',[7 7], 1.5*sigma_now);
-    %             dog{j-1}.g_mag = imfilter(dog{j-1}.g_mag,g_filter,'symmetric','same');
-
-            dog{j}.oct = oct;
+            [dog{j}.g_dir, dog{j}.g_mag] = cart2pol(L_gx, L_gy);            
         end  
         pre_level = cur_level;
     end
