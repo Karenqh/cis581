@@ -29,6 +29,7 @@ new_ex_inds = sub2ind([nr nc], new_ex_ys, new_ex_xs);
 
 [offset_x, offset_y] = grad_hessian(cur_layer, lower_layer, upper_layer, new_ex_inds);
 % ARE WE ASSUMING NO ONE IS EXCEEDING 0.5 NOW ???
+% If still having offsets greater than 0.5, discard the points
 key_xs = cat(1, key_xs, new_ex_xs + offset_x);
 key_ys = cat(1, key_ys, new_ex_ys + offset_y);
 
@@ -78,7 +79,7 @@ for cnt = 1:length(ex_inds)
 end
 offset_x = key_pts(1,:)';
 offset_y = key_pts(2,:)';
-% sigmas = key_pts(3,:)';
+sigmas = key_pts(3,:)';
 
 end
 

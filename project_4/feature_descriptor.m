@@ -1,4 +1,5 @@
-function Descriptors = feature_descriptor(im, KeyPoints) % SPECIFY LOCATION, SCALE, ORIENTATION
+function Descriptors = feature_descriptor(im, KeyPoints, desired_scale) 
+% TODO: SPECIFY LOCATION?, SCALE, ORIENTATION?
 nr = size(im,1);
 nc = size(im,2);
 [cols rows] = meshgrid(1:nc, 1:nr);

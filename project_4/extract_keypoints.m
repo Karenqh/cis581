@@ -24,12 +24,13 @@ KeyPoints = {};
 for oct=1:n_octave
     if oct>1  % Subsample BLURRED image
         pre_level = pre_level(2:2:size(pre_level,1), 2:2:size(pre_level,2));
-%         sigma0 = 2*sigma0;
+        sigma0 = sigma0*k;
     end
     
     % Get DoG
     dog = {[]};
     for j=0:5
+        % UPDATE SCALE WRONGLY
         sigma_now = sigma0*k^(j-1+oct-1);
         f_size = round(6*sigma_now);
         if mod(f_size,2)==0
@@ -40,7 +41,11 @@ for oct=1:n_octave
         
         if j>0
             dog{j}.img = cur_level - pre_level;
-            dog{j}.scale = sigma_now/k;
+            if oct>1
+                dog{j}.scale = sigma_now;
+            else
+                dog{j}.scale = sigma_now/k;
+            end
             dog{j}.oct = oct;
             
             % Mag and Ori of gradient for Orientation Assignment later
@@ -51,6 +56,10 @@ for oct=1:n_octave
         pre_level = cur_level;
     end
     
+    if debugging
+        disp('sigma_now')
+        disp(sigma_now)
+    end
     
     % Locate local extrema
     nr = size(dog{1}.img,1);
@@ -107,7 +116,7 @@ for oct=1:n_octave
         end
 
         % Get subpixel keypoints
-        [xs ys sigmas] = subpixel_extrema(lower_dog, cur_dog, upper_dog, inds_remain);
+%         [xs ys ~] = subpixel_extrema(lower_dog, cur_dog, upper_dog, inds_remain);
 
         %-------- Reject Unrobust Points -------
         keypoints_inds = localize_keypoints(cur_dog, inds_remain);
@@ -125,8 +134,9 @@ for oct=1:n_octave
 
             % Plot the arrows indicating orientations
             [u v] = pol2cart(KeyPoints{cnt}.orientation, KeyPoints{cnt}.scale);
-            disp('scale');
-            disp(KeyPoints{cnt}.scale);
+            disp('oct');   disp(oct)
+            disp('count'); disp(cnt)
+            disp('scale'); disp(KeyPoints{cnt}.scale);
             quiver(KeyPoints{cnt}.location(:,1), KeyPoints{cnt}.location(:,2), u, v, line_color{mod(cnt,5)+1});
             hold off;
         end
